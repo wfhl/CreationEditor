@@ -1,5 +1,7 @@
 import React, { useEffect, useState, type ChangeEvent } from 'react';
-import { Video as VideoIcon, ImagePlus, X, RefreshCw, Play, Save, Download, Layers, Sparkles, Upload, Trash2, ChevronDown, Loader2 } from 'lucide-react';
+import { Video as VideoIcon, ImagePlus, X, RefreshCw, Play, Save, Download, Layers, Sparkles, Upload, Trash2, Loader2 } from 'lucide-react';
+import { CustomSelect } from '../CustomSelect';
+
 import LoadingIndicator from '../loading-indicator';
 import { ImageWithLoader } from '../image-with-loader';
 import { dbService } from '../../lib/dbService';
@@ -143,7 +145,7 @@ export function AnimateTab({
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <label className="cursor-pointer bg-white/10 hover:bg-white/20 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 flex items-center gap-2 transition-all">
                                         <ImagePlus className="w-4 h-4 text-emerald-400" />
-                                        <span className="text-[9px] text-white font-bold uppercase tracking-widest">Replace</span>
+                                        <span style={{ fontSize: '9px', color: 'white', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', fontFamily: 'var(--font-ui)' }}>Replace</span>
                                         <input type="file" className="hidden" accept="image/*" onChange={handleI2VImageUpload} />
                                     </label>
                                 </div>
@@ -160,70 +162,58 @@ export function AnimateTab({
                     {/* AI Model & Params */}
                     <div className="creator-field">
                         <label className="creator-label">AI Model Engine</label>
-                        <div className="creator-select-wrap">
-                            <select
-                                value={selectedModel}
-                                onChange={(e) => setSelectedModel(e.target.value)}
-                                className="creator-select"
-                            >
-                                <option value="wan/v2.6/image-to-video/flash">Wan 2.6 Flash</option>
-                                <option value="fal-ai/wan-25-preview/image-to-video">Wan 2.5 Preview</option>
-                                <option value="fal-ai/bytedance/seedance/v1.5/pro/image-to-video">Seedance 1.5 Pro</option>
-                                <option value="xai/grok-imagine-video/image-to-video">Grok 2 Video</option>
-                                <option value="veo-3.1-generate-preview">Veo 3.1 (Google)</option>
-                            </select>
-                            <ChevronDown className="w-3 h-3 creator-chevron" />
-                        </div>
+                        <CustomSelect
+                            value={selectedModel}
+                            onChange={setSelectedModel}
+                            options={[
+                                { value: 'wan/v2.6/image-to-video/flash', label: 'Wan 2.6 Flash' },
+                                { value: 'fal-ai/wan-25-preview/image-to-video', label: 'Wan 2.5 Preview' },
+                                { value: 'fal-ai/bytedance/seedance/v1.5/pro/image-to-video', label: 'Seedance 1.5 Pro' },
+                                { value: 'xai/grok-imagine-video/image-to-video', label: 'Grok 2 Video' },
+                                { value: 'veo-3.1-generate-preview', label: 'Veo 3.1 (Google)' },
+                            ]}
+                        />
                     </div>
 
                     <div className="creator-field-grid">
                         <div className="creator-field">
                             <label className="creator-label">Resolution</label>
-                            <div className="creator-select-wrap">
-                                <select
-                                    value={videoResolution}
-                                    onChange={(e) => setVideoResolution(e.target.value)}
-                                    className="creator-select"
-                                >
-                                    <option value="1080p">1080p</option>
-                                    <option value="720p">720p</option>
-                                    <option value="480p">480p</option>
-                                </select>
-                                <ChevronDown className="w-3 h-3 creator-chevron" />
-                            </div>
+                            <CustomSelect
+                                value={videoResolution}
+                                onChange={setVideoResolution}
+                                options={[
+                                    { value: '1080p', label: '1080p' },
+                                    { value: '720p', label: '720p' },
+                                    { value: '480p', label: '480p' },
+                                ]}
+                            />
                         </div>
                         <div className="creator-field">
                             <label className="creator-label">Length</label>
-                            <div className="creator-select-wrap">
-                                <select
-                                    value={videoDuration}
-                                    onChange={(e) => setVideoDuration(e.target.value)}
-                                    className="creator-select"
-                                >
-                                    <option value="5s">5s</option>
-                                    <option value="10s">10s</option>
-                                    <option value="15s">15s</option>
-                                </select>
-                                <ChevronDown className="w-3 h-3 creator-chevron" />
-                            </div>
+                            <CustomSelect
+                                value={videoDuration}
+                                onChange={setVideoDuration}
+                                options={[
+                                    { value: '5s', label: '5 Seconds' },
+                                    { value: '10s', label: '10 Seconds' },
+                                    { value: '15s', label: '15 Seconds' },
+                                ]}
+                            />
                         </div>
                     </div>
 
                     <div className="creator-field">
                         <label className="creator-label">Aspect Ratio</label>
-                        <div className="creator-select-wrap">
-                            <select
-                                value={i2vAspectRatio}
-                                onChange={(e) => setI2VAspectRatio(e.target.value)}
-                                className="creator-select"
-                            >
-                                <option value="auto">Auto (Matches Image)</option>
-                                <option value="16:9">16:9 Landscape</option>
-                                <option value="9:16">9:16 Vertical</option>
-                                <option value="1:1">1:1 Square</option>
-                            </select>
-                            <ChevronDown className="w-3 h-3 creator-chevron" />
-                        </div>
+                        <CustomSelect
+                            value={i2vAspectRatio}
+                            onChange={setI2VAspectRatio}
+                            options={[
+                                { value: 'auto', label: 'Auto (Matches Image)' },
+                                { value: '16:9', label: '16:9 Landscape' },
+                                { value: '9:16', label: '9:16 Vertical' },
+                                { value: '1:1', label: '1:1 Square' },
+                            ]}
+                        />
                     </div>
 
                     {/* Seedance Options */}
@@ -249,7 +239,7 @@ export function AnimateTab({
                             <div className="creator-section-divider" />
                             <div className="flex justify-between items-center">
                                 <label className="creator-label"><Layers className="w-3 h-3 text-emerald-500" /> LoRAs</label>
-                                <button onClick={() => setLoras([...loras, { path: '', scale: 1.0 }])} className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest hover:text-emerald-300 transition-colors">+ Add</button>
+                                <button onClick={() => setLoras([...loras, { path: '', scale: 1.0 }])} style={{ fontSize: '9px', color: 'rgb(52,211,153)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.12em', fontFamily: 'var(--font-ui)', background: 'none', border: 'none', cursor: 'pointer' }}>+ Add</button>
                             </div>
                             <div className="flex flex-col gap-2">
                                 {loras.map((lora, idx) => (
@@ -293,26 +283,27 @@ export function AnimateTab({
             </div>
 
             {/* === RIGHT COLUMN: CONTENT & PREVIEW === */}
-            <div className="flex-1 min-w-0 flex flex-col h-full bg-[var(--bg-deep)] overflow-y-auto relative">
-                <div className="p-6 max-w-5xl mx-auto w-full space-y-6 pb-32">
-                    {/* Header */}
-                    <div className="flex items-center justify-between border-b border-[var(--border)] pb-8">
-                        <div className="flex items-center gap-6">
-                            <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
-                                <VideoIcon className="w-6 h-6 text-emerald-500" />
+            <div className="creator-content-panel">
+                <div className="creator-content-body">
+
+                    {/* Page Header */}
+                    <div className="creator-content-header">
+                        <div className="creator-content-title-wrap">
+                            <div className="creator-content-icon">
+                                <VideoIcon className="w-5 h-5 text-emerald-500" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-black text-white uppercase tracking-[0.2em]">Animate</h2>
-                                <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold mt-1">Turn images into video</p>
+                                <div className="creator-content-title">Animate</div>
+                                <div className="creator-content-subtitle">Turn images into video</div>
                             </div>
                         </div>
                     </div>
 
-                    {/* Motion Prompt Area */}
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-2">
-                                <Play className="w-3 h-3 text-emerald-400" /> Motion Prompt
+                    {/* Motion Prompt */}
+                    <div className="creator-field">
+                        <div className="creator-prompt-row">
+                            <label className="creator-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <Play style={{ width: 12, height: 12, color: 'rgb(52,211,153)' }} /> Motion Prompt
                             </label>
                             {presetsDropdown}
                         </div>
@@ -321,28 +312,33 @@ export function AnimateTab({
                             value={i2vPrompt}
                             onChange={(e) => setI2VPrompt(e.target.value)}
                             placeholder="Describe motion... (e.g., 'Camera pans right, person smiles')"
-                            className="w-full h-24 p-4 bg-black/40 border border-white/10 rounded-xl text-base text-white/90 focus:outline-none focus:border-emerald-500/50 shadow-inner"
+                            className="creator-textarea"
+                            style={{ minHeight: '96px' }}
                         />
-                        <div className="flex flex-wrap gap-2">
-                            {["Handheld vlog style", "Static camera", "Slow zoom in", "Cinematic drone shot"].map(s => (
-                                <button key={s} onClick={() => setI2VPrompt(i2vPrompt ? `${i2vPrompt}, ${s}` : s)} className="px-3 py-1 bg-white/5 hover:bg-white/10 rounded-full text-[9px] uppercase font-bold tracking-wider text-white/40 hover:text-emerald-400 border border-white/5 transition-all">{s}</button>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
+                            {['Handheld vlog style', 'Static camera', 'Slow zoom in', 'Cinematic drone shot'].map(s => (
+                                <button
+                                    key={s}
+                                    onClick={() => setI2VPrompt(i2vPrompt ? `${i2vPrompt}, ${s}` : s)}
+                                    className="creator-chip"
+                                >{s}</button>
                             ))}
                         </div>
                     </div>
 
                     {/* Result Area */}
-                    <div className="space-y-4 pt-4">
-                        <div className="flex items-center justify-between border-b border-white/5 pb-2">
-                            <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Output Video</h3>
+                    <div className="creator-result-section">
+                        <div className="creator-result-header">
+                            <span className="creator-result-title">Output Video</span>
                             {generatedI2VUrl && (
-                                <button onClick={onDiscardI2V} className="text-[10px] text-white/40 hover:text-white uppercase tracking-widest font-bold flex items-center gap-1">
-                                    <RefreshCw className="w-3 h-3" /> Reset
+                                <button onClick={onDiscardI2V} className="creator-result-action">
+                                    <RefreshCw style={{ width: 12, height: 12 }} /> Reset
                                 </button>
                             )}
                         </div>
 
                         {isGeneratingI2V ? (
-                            <div className="min-h-[400px] border-2 border-dashed border-emerald-500/20 bg-emerald-500/5 rounded-2xl flex flex-col items-center justify-center p-8 animate-pulse text-center">
+                            <div className="creator-loading-state">
                                 <LoadingIndicator title="Animating Video..." modelName={selectedModel} type="video" />
                             </div>
                         ) : generatedI2VUrl ? (
@@ -353,18 +349,18 @@ export function AnimateTab({
                                     <button onClick={() => onSaveToAssets(generatedI2VUrl, 'video')} className="p-2 bg-black/60 backdrop-blur-md rounded-xl text-white border border-white/10 hover:bg-emerald-500/20"><Save className="w-5 h-5" /></button>
                                 </div>
                                 <div className="absolute bottom-6 inset-x-6 flex justify-center opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={onApproveI2V} className="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-black font-bold uppercase tracking-widest rounded-xl shadow-xl shadow-emerald-900/40 transform active:scale-95 transition-all">Save & Add to Post</button>
+                                    <button onClick={onApproveI2V} className="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-black font-bold uppercase tracking-widest rounded-xl shadow-xl">Save & Add to Post</button>
                                 </div>
                             </div>
                         ) : (
-                            <div className="min-h-[400px] border-2 border-dashed border-white/5 bg-white/[0.02] rounded-2xl flex flex-col items-center justify-center p-8 text-center group">
-                                <VideoIcon className="w-16 h-16 text-white/10 mb-4 group-hover:text-emerald-500/20 transition-colors" />
-                                <h4 className="text-white/60 font-bold uppercase tracking-widest text-xs mb-2">Ready to Animate</h4>
-                                <p className="text-white/30 text-[10px] max-w-[250px] mx-auto mb-6">
-                                    Describe the motion you want to see and click "Animate Media" in the left pane.
+                            <div className="creator-empty-state">
+                                <VideoIcon style={{ width: 44, height: 44 }} className="creator-empty-state-icon" />
+                                <div className="creator-empty-state-title">Ready to Animate</div>
+                                <p className="creator-empty-state-text">
+                                    Describe the motion and click "Animate Media" in the left panel.
                                 </p>
                                 {!i2vTarget && (
-                                    <label className="px-6 py-2.5 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/30 rounded-lg text-[10px] font-bold uppercase tracking-widest text-emerald-400 transition-all cursor-pointer">
+                                    <label className="creator-empty-state-btn">
                                         Import Image First
                                         <input type="file" className="hidden" accept="image/*" onChange={handleI2VImageUpload} />
                                     </label>

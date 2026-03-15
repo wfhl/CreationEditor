@@ -1,4 +1,7 @@
-import { Loader2, Wand2, AlignLeft, ChevronDown, Copy, Save, X } from 'lucide-react';
+import React from 'react';
+import { Loader2, Wand2, AlignLeft, Copy, Save, X } from 'lucide-react';
+import { CustomSelect } from '../CustomSelect';
+
 
 export interface ScriptsTabProps {
     topic: string;
@@ -64,18 +67,11 @@ export function ScriptsTab({
 
                     <div className="creator-field">
                         <label className="creator-label">Style</label>
-                        <div className="creator-select-wrap">
-                            <select
-                                value={captionType}
-                                onChange={(e) => setCaptionType(e.target.value)}
-                                className="creator-select"
-                            >
-                                {captionStyles.map(t => (
-                                    <option key={t.id} value={t.id}>{t.label}</option>
-                                ))}
-                            </select>
-                            <ChevronDown className="w-4 h-4 creator-chevron" />
-                        </div>
+                        <CustomSelect
+                            value={captionType}
+                            onChange={setCaptionType}
+                            options={captionStyles.map(t => ({ value: t.id, label: t.label }))}
+                        />
                     </div>
                 </div>
 
@@ -96,74 +92,77 @@ export function ScriptsTab({
             </div>
 
             {/* === RIGHT COLUMN: PREVIEW/CANVAS === */}
-            <div className="flex-1 flex flex-col h-full overflow-y-auto bg-[var(--bg-deep)] relative">
-                <div className="p-6 max-w-5xl mx-auto w-full space-y-6 pb-32">
-                    
-                    {/* Header: Script View Label */}
-                    <div className="flex items-center justify-between border-b border-[var(--border)] pb-8">
-                        <div className="flex items-center gap-6">
-                            <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
-                                <AlignLeft className="w-6 h-6 text-emerald-500" />
+            <div className="creator-content-panel">
+                <div className="creator-content-body">
+
+                    {/* Page Header */}
+                    <div className="creator-content-header">
+                        <div className="creator-content-title-wrap">
+                            <div className="creator-content-icon">
+                                <AlignLeft className="w-5 h-5 text-emerald-500" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-black text-white uppercase tracking-[0.2em]">Script</h2>
-                                <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold mt-1">Video Script / Narration</p>
+                                <div className="creator-content-title">Script</div>
+                                <div className="creator-content-subtitle">Video script / narration</div>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <button 
-                                onClick={() => {
-                                    navigator.clipboard.writeText(generatedCaption);
-                                    alert("Copied to clipboard!");
-                                }} 
-                                className="text-[10px] flex items-center gap-1 text-white/40 hover:text-white transition-colors"
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <button
+                                onClick={() => { navigator.clipboard.writeText(generatedCaption); alert('Copied to clipboard!'); }}
+                                className="creator-result-action"
+                                style={{ display: 'flex' }}
                             >
-                                <Copy className="w-3 h-3" /> Copy
+                                <Copy style={{ width: 12, height: 12 }} /> Copy
                             </button>
                             {onSave && (
-                                <button 
-                                    onClick={onSave} 
-                                    className="px-4 py-2 bg-white/5 hover:bg-emerald-500/10 hover:text-emerald-400 border border-white/10 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all"
+                                <button
+                                    onClick={onSave}
+                                    style={{ padding: '6px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
                                 >
-                                    <Save className="w-3 h-3 inline mr-2" /> Save to Library
+                                    <Save style={{ width: 13, height: 13 }} /> Save
                                 </button>
                             )}
                         </div>
                     </div>
 
                     {/* Script Output Area */}
-                    <div className="space-y-4">
-                        <div className="relative flex flex-col gap-4">
-                            <textarea
-                                value={generatedCaption}
-                                onChange={(e) => setGeneratedCaption(e.target.value)}
-                                placeholder="Generated script will appear here. Edit it or generate a new one."
-                                className="w-full min-h-[50vh] p-6 bg-black/40 border border-white/10 rounded-2xl text-base text-white/90 font-serif leading-relaxed resize-none focus:outline-none focus:border-emerald-500/50 transition-colors shadow-inner"
-                            />
-                            
-                            {isGeneratingCaption && (
-                                <div className="absolute inset-0 bg-black/60 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center border border-white/5 z-10">
-                                    <div className="flex items-center gap-3 text-emerald-400 font-bold uppercase tracking-widest">
-                                        <Loader2 className="w-6 h-6 animate-spin" />
-                                        Writing Script...
-                                    </div>
-                                    <p className="text-white/40 text-xs mt-3 italic font-serif">Channeling creativity...</p>
+                    <div className="creator-field" style={{ position: 'relative' }}>
+                        <label className="creator-label">
+                            <Wand2 style={{ width: 12, height: 12, color: 'rgb(52,211,153)' }} /> Script Output
+                        </label>
+                        <textarea
+                            value={generatedCaption}
+                            onChange={(e) => setGeneratedCaption(e.target.value)}
+                            placeholder="Generated script will appear here. Edit it or generate a new one."
+                            className="creator-textarea"
+                            style={{ minHeight: '55vh', fontFamily: 'var(--font-body)', lineHeight: 1.7 }}
+                        />
+                        {isGeneratingCaption && (
+                            <div style={{
+                                position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)',
+                                backdropFilter: 'blur(8px)', borderRadius: '8px',
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                gap: '12px', zIndex: 10,
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'rgb(52,211,153)', fontWeight: 800, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em' }}>
+                                    <Loader2 style={{ width: 20, height: 20, animation: 'spin 1s linear infinite' }} />
+                                    Writing Script...
                                 </div>
-                            )}
-
-                            {/* Additional Actions Row */}
-                            {!isGeneratingCaption && generatedCaption && (
-                                <div className="flex justify-end gap-3">
-                                    <button 
-                                        onClick={() => setGeneratedCaption("")}
-                                        className="px-4 py-2 bg-white/5 hover:bg-red-500/10 hover:text-red-400 border border-white/10 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all"
-                                    >
-                                        Clear
-                                    </button>
-                                </div>
-                            )}
-                        </div>
+                                <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '11px', fontStyle: 'italic' }}>Channeling creativity...</p>
+                            </div>
+                        )}
                     </div>
+
+                    {!isGeneratingCaption && generatedCaption && (
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <button
+                                onClick={() => setGeneratedCaption('')}
+                                style={{ padding: '6px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}
+                            >
+                                Clear
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

@@ -171,7 +171,7 @@ export function CreateTab({
                         </div>
                         <div>
                             <p className="creator-panel-title">Setup</p>
-                            <p style={{fontSize: '9px', color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '2px'}}>Configure your creation</p>
+                            <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '2px', fontFamily: 'var(--font-ui)' }}>Configure your creation</p>
                         </div>
                     </div>
 
@@ -319,7 +319,7 @@ export function CreateTab({
                                     <Layers className="w-3 h-3 text-emerald-500" />
                                     Model Weights
                                 </label>
-                                <button onClick={() => setLoras([...loras, { path: '', scale: 1.0 }])} style={{fontSize: '9px', color: '#34d399', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em'}}>+ Add</button>
+                                <button onClick={() => setLoras([...loras, { path: '', scale: 1.0 }])} style={{ fontSize: '9px', color: '#34d399', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-ui)', background: 'none', border: 'none', cursor: 'pointer' }}>+ Add</button>
                             </div>
                             <div className="flex flex-col gap-2">
                                 {loras.map((lora, idx) => (
@@ -490,156 +490,118 @@ export function CreateTab({
                 </div>
             </div>
 
-            <div className="flex-1 min-w-0 flex flex-col h-full bg-[#0e0e11] relative">
-                <div className="flex-1 flex flex-col h-full overflow-y-auto hidden-scrollbar relative min-h-0" style={{ padding: '32px 40px' }}>
-                    <div className="max-w-5xl mx-auto w-full" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                    
-                        {/* Header: Title and Mode Toggle */}
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '20px', borderBottom: '1px solid var(--border)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                                <div style={{ width: '40px', height: '40px', background: 'rgba(16,185,129,0.1)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(16,185,129,0.2)', flexShrink: 0 }}>
-                                    <Sparkles className="w-5 h-5 text-emerald-500" />
-                                </div>
-                                <div>
-                                    <h2 style={{ fontSize: '18px', fontWeight: 900, color: 'white', textTransform: 'uppercase', letterSpacing: '0.2em', lineHeight: 1 }}>Create</h2>
-                                    <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.12em', fontWeight: 700, marginTop: '4px' }}>Synthesize new high-fidelity media assets</p>
-                                </div>
+            {/* === RIGHT COLUMN: CONTENT & PREVIEW === */}
+            <div className="creator-content-panel">
+                <div className="creator-content-body">
+
+                    {/* Page Header */}
+                    <div className="creator-content-header">
+                        <div className="creator-content-title-wrap">
+                            <div className="creator-content-icon">
+                                <Sparkles className="w-5 h-5 text-emerald-500" />
+                            </div>
+                            <div>
+                                <div className="creator-content-title">Create</div>
+                                <div className="creator-content-subtitle">Synthesize new high-fidelity assets</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Final Prompt Area */}
+                    <div className="creator-field">
+                        <div className="creator-prompt-row">
+                            <label className="creator-label">
+                                <Wand2 style={{ width: 12, height: 12, color: 'rgb(52,211,153)' }} /> Final Prompt
+                            </label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                {presetsDropdown}
+                                <button
+                                    onClick={() => handleCopy(generatedPrompt)}
+                                    className="creator-result-action"
+                                >
+                                    <Copy style={{ width: 12, height: 12 }} /> Copy
+                                </button>
+                            </div>
+                        </div>
+                        <textarea
+                            ref={promptRef}
+                            value={generatedPrompt}
+                            onChange={(e) => setGeneratedPrompt(e.target.value)}
+                            placeholder="Generate a prompt first, or paste one here..."
+                            className="creator-textarea"
+                            style={{ minHeight: '140px' }}
+                        />
+                    </div>
+
+                    {/* Results Section */}
+                    <div className="creator-result-section">
+                        <div className="creator-result-header">
+                            <span className="creator-result-title">Creation Results</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                {generatedMediaUrls.length > 0 && (
+                                    <>
+                                        <button onClick={handleGenerateRandomPost} className="creator-result-action">
+                                            <Dices style={{ width: 12, height: 12 }} /> Randomize
+                                        </button>
+                                        <button onClick={() => setShowSaveForm(true)} className="creator-result-action" style={{ color: 'rgb(52,211,153)' }}>
+                                            <Save style={{ width: 12, height: 12 }} /> Save to Library
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         </div>
 
-                        {/* Final Prompt Area */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <label style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.12em', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <Wand2 className="w-3 h-3 text-emerald-400" /> Final Prompt
+                        {isGeneratingMedia ? (
+                            <div className="creator-loading-state">
+                                <LoadingIndicator title="Generating..." modelName={selectedModel} type={mediaType} />
+                            </div>
+                        ) : generatedMediaUrls.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-12">
+                                {generatedMediaUrls.map((url, idx) => (
+                                    <div key={idx} className="relative group aspect-[3/4] bg-black/40 rounded-xl overflow-hidden border border-white/5 shadow-2xl hover:border-emerald-500/30 transition-all">
+                                        <ImageWithLoader src={url} alt="Gen" className="w-full h-full" onClick={() => onPreview(url)} />
+                                        <div className="absolute top-3 right-3 flex gap-2 bg-black/60 backdrop-blur-md p-2 rounded-2xl border border-white/10 opacity-100 group-hover:opacity-100 transition-opacity">
+                                            <button onClick={() => handleRefineEntry(url, idx)} className="p-2 hover:bg-white/10 rounded-xl" title="Refine Media in Editor"><Edit2 className="w-4 h-4 text-emerald-400" /></button>
+                                            <button onClick={() => onDownload(url, `gen_${idx}`)} className="p-2 hover:bg-white/10 rounded-xl text-white" title="Download Media Output"><Download className="w-4 h-4" /></button>
+                                            <button onClick={() => onRemoveMedia(idx)} className="p-2 hover:bg-red-500/20 rounded-xl text-red-500" title="Delete Media"><Trash2 className="w-4 h-4 text-red-500" /></button>
+                                        </div>
+                                        <div className="absolute bottom-6 inset-x-6 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button onClick={() => handleI2VEntry(url, idx)} className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-black text-[11px] font-bold uppercase tracking-widest rounded-xl shadow-lg flex items-center justify-center gap-2.5">
+                                                <VideoIcon className="w-4 h-4" /> Animate Video
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                <label className="aspect-[3/4] border-2 border-dashed border-white/5 bg-white/[0.02] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 hover:border-emerald-500/50 transition-all group">
+                                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 group-hover:bg-emerald-500/10 group-hover:scale-110 transition-all">
+                                        <Upload className="w-6 h-6 text-white/20 group-hover:text-emerald-400" />
+                                    </div>
+                                    <span className="text-[11px] text-white/40 font-bold uppercase tracking-widest">Import More</span>
+                                    <input type="file" multiple accept="image/*,video/*" className="hidden" onChange={(e) => onUploadToPost(e.target.files)} />
                                 </label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    {presetsDropdown}
-                                    <button onClick={() => handleCopy(generatedPrompt)} style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', color: 'rgba(255,255,255,0.4)' }}>
-                                        <Copy className="w-3 h-3" /> Copy
+                            </div>
+                        ) : (
+                            <div className="creator-empty-state">
+                                <ImageIcon style={{ width: 44, height: 44 }} className="creator-empty-state-icon" />
+                                <div className="creator-empty-state-title">No Generations Yet</div>
+                                <p className="creator-empty-state-text">
+                                    Set up your theme and visuals in the left pane, then click "Generate" to start creating.
+                                </p>
+                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                                    <button
+                                        onClick={() => onNavigateTo?.('media')}
+                                        className="creator-empty-state-btn"
+                                        style={{ background: 'rgba(16,185,129,0.12)', color: 'rgb(52,211,153)', border: '1px solid rgba(16,185,129,0.3)' }}
+                                    >
+                                        Import from Library
                                     </button>
-                                </div>
-                            </div>
-                            <textarea
-                                ref={promptRef}
-                                value={generatedPrompt}
-                                onChange={(e) => setGeneratedPrompt(e.target.value)}
-                                style={{
-                                    width: '100%',
-                                    height: '140px',
-                                    padding: '16px 20px',
-                                    background: 'rgba(0,0,0,0.4)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    borderRadius: '16px',
-                                    color: 'rgba(255,255,255,0.9)',
-                                    fontSize: '13px',
-                                    lineHeight: '1.7',
-                                    fontFamily: 'inherit',
-                                    resize: 'vertical',
-                                    outline: 'none',
-                                    boxSizing: 'border-box'
-                                }}
-                                placeholder="Generate a prompt first, or paste one here..."
-                            />
-                        </div>
-
-                        {/* Results / Empty State */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            <div className="flex items-center justify-between border-b border-white/5 pb-4">
-                                <h3 className="text-[11px] font-bold text-white/40 uppercase tracking-widest">Creation Results</h3>
-                                <div className="flex items-center gap-4">
-                                    {generatedMediaUrls.length > 0 && (
-                                        <>
-                                            <button onClick={handleGenerateRandomPost} className="text-[11px] text-white/40 hover:text-emerald-400 uppercase tracking-widest font-bold flex items-center gap-1.5 transition-colors">
-                                                <Dices className="w-3.5 h-3.5" /> Randomize
-                                            </button>
-                                            <button onClick={() => setShowSaveForm(true)} className="text-[11px] text-emerald-400 hover:text-emerald-300 uppercase tracking-widest font-bold flex items-center gap-1.5 transition-colors">
-                                                <Save className="w-3.5 h-3.5" /> Save to Library
-                                            </button>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-
-                            {isGeneratingMedia ? (
-                                <div className="min-h-[400px] border-2 border-dashed border-emerald-500/20 bg-emerald-500/5 rounded-2xl flex flex-col items-center justify-center p-12 animate-pulse text-center space-y-6">
-                                    <LoadingIndicator title="Generating..." modelName={selectedModel} type={mediaType} />
-                                </div>
-                            ) : generatedMediaUrls.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-12">
-                                    {generatedMediaUrls.map((url, idx) => (
-                                        <div key={idx} className="relative group aspect-[3/4] bg-black/40 rounded-xl overflow-hidden border border-white/5 shadow-2xl hover:border-emerald-500/30 transition-all">
-                                            <ImageWithLoader src={url} alt="Gen" className="w-full h-full" onClick={() => onPreview(url)} />
-                                            <div className="absolute top-3 right-3 flex gap-2 bg-black/60 backdrop-blur-md p-2 rounded-2xl border border-white/10 opacity-100 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => handleRefineEntry(url, idx)} className="p-2 hover:bg-white/10 rounded-xl" title="Refine Media in Editor"><Edit2 className="w-4 h-4 text-emerald-400" /></button>
-                                                <button onClick={() => onDownload(url, `gen_${idx}`)} className="p-2 hover:bg-white/10 rounded-xl text-white" title="Download Media Output"><Download className="w-4 h-4" /></button>
-                                                <button onClick={() => onRemoveMedia(idx)} className="p-2 hover:bg-red-500/20 rounded-xl text-red-500" title="Delete Media"><Trash2 className="w-4 h-4 text-red-500" /></button>
-                                            </div>
-                                            <div className="absolute bottom-6 inset-x-6 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button onClick={() => handleI2VEntry(url, idx)} className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-black text-[11px] font-bold uppercase tracking-widest rounded-xl shadow-lg flex items-center justify-center gap-2.5">
-                                                    <VideoIcon className="w-4 h-4" /> Animate Video
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                    <label className="aspect-[3/4] border-2 border-dashed border-white/5 bg-white/[0.02] rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-white/5 hover:border-emerald-500/50 transition-all group">
-                                        <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4 group-hover:bg-emerald-500/10 group-hover:scale-110 transition-all">
-                                            <Upload className="w-6 h-6 text-white/20 group-hover:text-emerald-400" />
-                                        </div>
-                                        <span className="text-[11px] text-white/40 font-bold uppercase tracking-widest">Import More</span>
-                                        <input type="file" multiple accept="image/*,video/*" className="hidden" onChange={(e) => onUploadToPost(e.target.files)} />
+                                    <label className="creator-empty-state-btn">
+                                        Upload Local
+                                        <input type="file" multiple className="hidden" onChange={(e) => onUploadToPost(e.target.files)} />
                                     </label>
                                 </div>
-                            ) : (
-                                <div className="min-h-[500px] border border-dashed border-white/10 bg-white/[0.02] rounded-2xl flex flex-col items-center justify-center p-12 text-center group">
-                                    <div className="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mb-6 text-white/20 group-hover:scale-110 transition-transform">
-                                        <ImageIcon className="w-10 h-10" />
-                                    </div>
-                                    <h4 className="text-white/60 font-bold uppercase tracking-widest text-sm mb-3">No Generations Yet</h4>
-                                    <p className="text-white/30 text-[11px] max-w-[280px] mx-auto mb-8 leading-relaxed">
-                                        Set up your theme and visuals in the left pane, then click "Generate Media" to start creating.
-                                    </p>
-                                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                                        <button
-                                            onClick={() => onNavigateTo?.('media')}
-                                            style={{
-                                                padding: '14px 28px',
-                                                background: 'rgba(16,185,129,0.15)',
-                                                border: '1px solid rgba(16,185,129,0.35)',
-                                                borderRadius: '10px',
-                                                fontSize: '12px',
-                                                fontWeight: 700,
-                                                textTransform: 'uppercase',
-                                                letterSpacing: '0.1em',
-                                                color: 'rgb(52,211,153)',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.15s',
-                                            }}
-                                        >
-                                            Import from Library
-                                        </button>
-                                        <label
-                                            style={{
-                                                padding: '14px 28px',
-                                                background: 'rgba(255,255,255,0.05)',
-                                                border: '1px solid rgba(255,255,255,0.12)',
-                                                borderRadius: '10px',
-                                                fontSize: '12px',
-                                                fontWeight: 700,
-                                                textTransform: 'uppercase',
-                                                letterSpacing: '0.1em',
-                                                color: 'rgba(255,255,255,0.6)',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.15s',
-                                            }}
-                                        >
-                                            Upload Local
-                                            <input type="file" multiple className="hidden" onChange={(e) => onUploadToPost(e.target.files)} />
-                                        </label>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

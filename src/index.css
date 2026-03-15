@@ -5,6 +5,9 @@
 /* Tailwind CSS v4 — used by creator components */
 @import "tailwindcss";
 
+/* ─── Google Fonts ─── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&display=swap');
+
 :root {
   --bg:          #1b1b1f;
   --bg-deep:     #141417;
@@ -34,8 +37,12 @@
   --creator-ctrl-pad:  0 12px;      /* padding for single-line controls */
   --creator-ctrl-font: 13px;
   --creator-label-size: 11px;       /* ALL creator labels share this */
-  --creator-label-color: rgba(255,255,255,0.5);
-  --creator-accent:    rgb(52,211,153);
+  --creator-label-color: rgba(255, 255, 255, 0.5);
+  --creator-accent:    rgb(52, 211, 153);
+
+  /* ─── Typography Tokens ─── */
+  --font-ui:      'Outfit', 'Inter', -apple-system, sans-serif;
+  --font-body:    'Inter', -apple-system, sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -46,7 +53,7 @@
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-body);
   background: var(--bg-deep);
   color: var(--text);
   height: 100vh;
@@ -788,6 +795,7 @@ body {
 
 .prop-slider {
   flex: 1;
+  appearance: none;
   -webkit-appearance: none;
   height: 4px;
   border-radius: 2px;
@@ -795,6 +803,7 @@ body {
   outline: none;
 }
 .prop-slider::-webkit-slider-thumb {
+  appearance: none;
   -webkit-appearance: none;
   width: 14px;
   height: 14px;
@@ -2098,11 +2107,12 @@ body {
 
 /* ─── Creator Label ─── */
 .creator-label {
+  font-family: var(--font-ui);
   font-size: var(--creator-label-size);
   font-weight: 700;
   color: var(--creator-label-color);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   display: flex;
   align-items: center;
   gap: 5px;
@@ -2120,7 +2130,8 @@ body {
   border-radius: var(--creator-ctrl-radius);
   color: rgba(255, 255, 255, 0.9);
   font-size: var(--creator-ctrl-font);
-  font-family: inherit;
+  font-family: var(--font-ui);
+  font-weight: 600;
   padding: var(--creator-ctrl-pad);
   outline: none;
   transition: border-color 0.15s, background 0.15s;
@@ -2137,7 +2148,8 @@ body {
   border-radius: var(--creator-ctrl-radius);
   color: rgba(255, 255, 255, 0.9);
   font-size: var(--creator-ctrl-font);
-  font-family: inherit;
+  font-family: var(--font-body);
+  font-weight: 500;
   padding: 10px 12px;
   outline: none;
   transition: border-color 0.15s, background 0.15s;
@@ -2413,5 +2425,161 @@ body {
   background: rgba(255, 255, 255, 0.1);
   color: #10b981;
   border-color: rgba(16, 185, 129, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Right Content Panel — Shared Layout Classes
+   Used by Create, Refine, Script, and Animate tab right sides
+   ═══════════════════════════════════════════════════════════ */
+
+/* Outer scrollable column */
+.creator-content-panel {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-deep, #0d0d12);
+  overflow-y: auto;
+  position: relative;
+}
+
+/* Inner padded/max-width body */
+.creator-content-body {
+  padding: 24px 28px 80px;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Row that holds the section label + presets/action button */
+.creator-prompt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+/* Result section wrapper */
+.creator-result-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Result area title row */
+.creator-result-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.creator-result-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.13em;
+}
+
+.creator-result-action {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color 0.15s;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.creator-result-action:hover {
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Empty / waiting state placeholder */
+.creator-empty-state {
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 24px;
+  text-align: center;
+  border: 2px dashed rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.015);
+  border-radius: 18px;
+}
+
+.creator-empty-state-icon {
+  color: rgba(255, 255, 255, 0.1);
+  margin-bottom: 4px;
+}
+
+.creator-empty-state-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.creator-empty-state-text {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.28);
+  line-height: 1.55;
+  max-width: 260px;
+}
+
+.creator-empty-state-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 12px 24px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgb(52, 211, 153);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.creator-empty-state-btn:hover {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: rgba(16, 185, 129, 0.45);
+}
+
+/* Loading / generating state */
+.creator-loading-state {
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px 24px;
+  text-align: center;
+  border: 2px dashed rgba(16, 185, 129, 0.18);
+  background: rgba(16, 185, 129, 0.04);
+  border-radius: 18px;
+  animation: pulse 2s infinite;
 }
 

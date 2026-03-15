@@ -89,6 +89,7 @@ export function PresetsDropdown({
         color: isOpen ? 'rgb(52,211,153)' : 'rgba(255,255,255,0.45)',
         cursor: 'pointer',
         transition: 'all 0.15s',
+        fontFamily: 'var(--font-ui, inherit)',
         whiteSpace: 'nowrap',
     };
 
@@ -136,7 +137,7 @@ export function PresetsDropdown({
                                 borderRadius: '8px',
                                 color: 'rgba(255,255,255,0.9)',
                                 fontSize: '13px',
-                                fontFamily: 'inherit',
+                                fontFamily: 'var(--font-body, inherit)',
                                 padding: '0 12px',
                                 outline: 'none',
                                 boxSizing: 'border-box',
@@ -152,6 +153,7 @@ export function PresetsDropdown({
                                     fontSize: '11px', fontWeight: 800,
                                     textTransform: 'uppercase', letterSpacing: '0.08em',
                                     cursor: 'pointer',
+                                    fontFamily: 'var(--font-ui, inherit)',
                                 }}
                             >
                                 Save
@@ -165,6 +167,7 @@ export function PresetsDropdown({
                                     border: '1px solid rgba(255,255,255,0.1)', borderRadius: '7px',
                                     fontSize: '11px', fontWeight: 700,
                                     cursor: 'pointer',
+                                    fontFamily: 'var(--font-ui, inherit)',
                                 }}
                             >
                                 Cancel
@@ -185,6 +188,7 @@ export function PresetsDropdown({
                             textTransform: 'uppercase', letterSpacing: '0.1em',
                             cursor: 'pointer',
                             transition: 'all 0.15s',
+                            fontFamily: 'var(--font-ui, inherit)',
                         }}
                         onMouseEnter={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.18)')}
                         onMouseLeave={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.1)')}
@@ -206,6 +210,7 @@ export function PresetsDropdown({
                         fontWeight: 700,
                         textTransform: 'uppercase',
                         letterSpacing: '0.1em',
+                        fontFamily: 'var(--font-ui, inherit)',
                     }}>
                         No {tab} presets saved yet
                     </div>
@@ -227,6 +232,7 @@ export function PresetsDropdown({
                             <span style={{
                                 flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                                 fontSize: '13px', color: 'rgba(255,255,255,0.8)',
+                                fontFamily: 'var(--font-body, inherit)',
                             }}>
                                 {post.name || post.topic || 'Untitled'}
                             </span>
@@ -254,7 +260,7 @@ export function PresetsDropdown({
 
             {filteredPresets.length > 10 && (
                 <div style={{ padding: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
-                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', fontStyle: 'italic' }}>
+                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', fontStyle: 'italic', fontFamily: 'var(--font-body, inherit)' }}>
                         Showing 10 of {filteredPresets.length}
                     </span>
                 </div>
