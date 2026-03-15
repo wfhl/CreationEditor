@@ -1,15 +1,16 @@
-import React, { useRef, useEffect } from 'react';
-import { ChevronDown, Sparkles, Trash2 } from 'lucide-react';
+import React, { useRef, useEffect, useLayoutEffect, useState } from 'react';
+import ReactDOM from 'react-dom';
+import { ChevronUp, ChevronDown, Sparkles, Trash2, BookMarked } from 'lucide-react';
 
 interface PresetsDropdownProps {
     isOpen: boolean;
     setIsOpen: (val: boolean) => void;
     showSaveForm: boolean;
     setShowSaveForm: (val: boolean) => void;
-    currentPostData: any; // Using any for simplicity in props, but typed in logic
-    onSavePost: (data: any, name?: string) => Promise<string | undefined>; // Returns ID
+    currentPostData: any;
+    onSavePost: (data: any, name?: string) => Promise<string | undefined>;
     onLoadPreset: (preset: any) => void;
-    presetsList: any[]; // List of presets (saved posts)
+    presetsList: any[];
     onDeletePreset: (id: string) => void;
     direction?: 'up' | 'down';
     tab: string;
@@ -28,170 +29,274 @@ export function PresetsDropdown({
     direction = 'up',
     tab
 }: PresetsDropdownProps) {
-    const dropdownRef = useRef<HTMLDivElement>(null);
-    const [presetName, setPresetName] = React.useState("");
+    const triggerRef = useRef<HTMLButtonElement>(null);
+    const panelRef = useRef<HTMLDivElement>(null);
+    const [presetName, setPresetName] = useState('');
+    const [panelPos, setPanelPos] = useState<{ top: number; left: number; width: number; openUp: boolean } | null>(null);
 
     const filteredPresets = presetsList.filter(p => p.tab === tab || (!p.tab && tab === 'create'));
 
-    // Close on click outside
+    // Calculate portal position
+    useLayoutEffect(() => {
+        if (isOpen && triggerRef.current) {
+            const rect = triggerRef.current.getBoundingClientRect();
+            const estimatedH = 320;
+            const spaceAbove = rect.top;
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const openUp = direction === 'up' || spaceBelow < estimatedH;
+            setPanelPos({
+                top: openUp ? rect.top : rect.bottom + 4,
+                left: rect.right - 280, // right-align the 280px panel
+                width: 280,
+                openUp,
+            });
+        }
+    }, [isOpen, direction]);
+
+    // Outside click
     useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        if (!isOpen) return;
+        function onDown(e: MouseEvent) {
+            if (
+                triggerRef.current && !triggerRef.current.contains(e.target as Node) &&
+                panelRef.current && !panelRef.current.contains(e.target as Node)
+            ) {
                 setIsOpen(false);
+                setShowSaveForm(false);
             }
         }
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [isOpen, setIsOpen]);
+        document.addEventListener('mousedown', onDown);
+        return () => document.removeEventListener('mousedown', onDown);
+    }, [isOpen, setIsOpen, setShowSaveForm]);
 
-    // Reset name when form opens
     useEffect(() => {
-        if (showSaveForm) setPresetName("");
+        if (showSaveForm) setPresetName('');
     }, [showSaveForm]);
 
-    // Update the onSavePost type in props potentially or just cast
-    // But since onSavePost is typed as `(data: any) => ...` in interface, we should update interface first or assume it accepts extra args if it was flexible. 
-    // In simple-creator it will be updated.
+    const triggerBtnStyle: React.CSSProperties = {
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+        padding: '5px 10px',
+        height: '28px',
+        background: isOpen ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.04)',
+        border: `1px solid ${isOpen ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.1)'}`,
+        borderRadius: '7px',
+        fontSize: '11px',
+        fontWeight: 700,
+        textTransform: 'uppercase',
+        letterSpacing: '0.1em',
+        color: isOpen ? 'rgb(52,211,153)' : 'rgba(255,255,255,0.45)',
+        cursor: 'pointer',
+        transition: 'all 0.15s',
+        fontFamily: 'var(--font-ui, inherit)',
+        whiteSpace: 'nowrap',
+    };
 
-    return (
-        <div ref={dropdownRef} className="relative">
-            <div className="flex justify-end">
-                <button
-                    onClick={() => {
-                        setIsOpen(!isOpen);
-                        setShowSaveForm(false);
-                    }}
-                    className={`text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 transition-all active-scale ${isOpen ? 'text-emerald-400' : 'text-white/40 hover:text-emerald-400'}`}
-                >
-                    <div className={`w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-emerald-500' : 'bg-white/20'}`}></div>
-                    Presets
-                    <ChevronDown className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-                </button>
+    const portal = isOpen && panelPos ? ReactDOM.createPortal(
+        <div
+            ref={panelRef}
+            style={{
+                position: 'fixed',
+                top: panelPos.top,
+                left: Math.max(8, panelPos.left),
+                width: panelPos.width,
+                transform: panelPos.openUp ? 'translateY(-100%) translateY(-4px)' : 'none',
+                background: '#14141a',
+                border: '1px solid rgba(255,255,255,0.12)',
+                borderRadius: '12px',
+                zIndex: 99999,
+                boxShadow: '0 16px 48px rgba(0,0,0,0.75)',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+            }}
+        >
+            {/* Header action */}
+            <div style={{ padding: '10px', borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}>
+                {showSaveForm ? (
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            onSavePost(currentPostData, presetName);
+                            setShowSaveForm(false);
+                        }}
+                        style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+                    >
+                        <input
+                            autoFocus
+                            type="text"
+                            placeholder="Name this preset..."
+                            value={presetName}
+                            onChange={e => setPresetName(e.target.value)}
+                            style={{
+                                width: '100%',
+                                height: '36px',
+                                background: 'rgba(0,0,0,0.5)',
+                                border: '1px solid rgba(16,185,129,0.4)',
+                                borderRadius: '8px',
+                                color: 'rgba(255,255,255,0.9)',
+                                fontSize: '13px',
+                                fontFamily: 'var(--font-body, inherit)',
+                                padding: '0 12px',
+                                outline: 'none',
+                                boxSizing: 'border-box',
+                            }}
+                        />
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                            <button
+                                type="submit"
+                                style={{
+                                    flex: 1, height: '32px',
+                                    background: 'rgb(16,185,129)', color: 'black',
+                                    border: 'none', borderRadius: '7px',
+                                    fontSize: '11px', fontWeight: 800,
+                                    textTransform: 'uppercase', letterSpacing: '0.08em',
+                                    cursor: 'pointer',
+                                    fontFamily: 'var(--font-ui, inherit)',
+                                }}
+                            >
+                                Save
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setShowSaveForm(false)}
+                                style={{
+                                    height: '32px', padding: '0 12px',
+                                    background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.5)',
+                                    border: '1px solid rgba(255,255,255,0.1)', borderRadius: '7px',
+                                    fontSize: '11px', fontWeight: 700,
+                                    cursor: 'pointer',
+                                    fontFamily: 'var(--font-ui, inherit)',
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                ) : (
+                    <button
+                        onClick={() => setShowSaveForm(true)}
+                        style={{
+                            width: '100%', height: '36px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '7px',
+                            background: 'rgba(16,185,129,0.1)',
+                            border: '1px solid rgba(16,185,129,0.25)',
+                            borderRadius: '8px',
+                            color: 'rgb(52,211,153)',
+                            fontSize: '11px', fontWeight: 700,
+                            textTransform: 'uppercase', letterSpacing: '0.1em',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s',
+                            fontFamily: 'var(--font-ui, inherit)',
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.18)')}
+                        onMouseLeave={e => (e.currentTarget.style.background = 'rgba(16,185,129,0.1)')}
+                    >
+                        <Sparkles style={{ width: 13, height: 13 }} />
+                        Save Context
+                    </button>
+                )}
             </div>
 
-            {isOpen && (
-                <div ref={dropdownRef} className={`absolute right-0 w-72 bg-[#0a0a0a] border border-white/10 rounded-xl shadow-2xl overflow-hidden flex flex-col ring-1 ring-white/10 z-[100] animate-in fade-in duration-200 ${direction === 'up' ? 'bottom-full mb-2 slide-in-from-bottom-2' : 'top-full mt-2 slide-in-from-top-2'}`}>
-
-                    {/* Header Actions */}
-                    <div className="p-2 border-b border-white/5 bg-white/5 flex gap-2">
-                        <button
-                            onClick={() => setShowSaveForm(true)}
-                            className={`w-full py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 active-scale ${showSaveForm ? 'bg-emerald-500/30' : ''}`}
+            {/* Presets list */}
+            <div style={{ overflowY: 'auto', maxHeight: '220px' }}>
+                {filteredPresets.length === 0 ? (
+                    <div style={{
+                        padding: '24px 16px',
+                        textAlign: 'center',
+                        color: 'rgba(255,255,255,0.2)',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        fontFamily: 'var(--font-ui, inherit)',
+                    }}>
+                        No {tab} presets saved yet
+                    </div>
+                ) : (
+                    filteredPresets.slice(0, 10).map((post, i) => (
+                        <div
+                            key={post.id}
+                            onClick={() => { onLoadPreset(post); setIsOpen(false); }}
+                            style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                padding: '0 12px', height: '40px',
+                                cursor: 'pointer',
+                                borderBottom: i < Math.min(filteredPresets.length, 10) - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                                transition: 'background 0.1s',
+                            }}
+                            onMouseEnter={e => (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.05)'}
+                            onMouseLeave={e => (e.currentTarget as HTMLDivElement).style.background = 'transparent'}
                         >
-                            <Sparkles className="w-3 h-3" /> Save Context
-                        </button>
-                    </div>
-
-                    {/* Mobile Save Form Modal */}
-                    {showSaveForm && (
-                        <div className="md:hidden fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300" onClick={() => setShowSaveForm(false)}>
-                            <div className="w-full max-w-[320px] bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-8 space-y-6 shadow-2xl animate-in zoom-in-95 duration-200" onClick={e => e.stopPropagation()}>
-                                <div className="text-center space-y-2">
-                                    <div className="w-12 h-12 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-2 text-emerald-400">
-                                        <Sparkles className="w-6 h-6" />
-                                    </div>
-                                    <h3 className="text-2xl font-bold font-serif text-white tracking-tight">Save Preset</h3>
-                                    <p className="text-[10px] text-white/40 uppercase tracking-widest font-bold">Store your current setup</p>
-                                </div>
-
-                                <form
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-                                        onSavePost(currentPostData, presetName);
-                                        setShowSaveForm(false);
-                                    }}
-                                    className="space-y-6"
-                                >
-                                    <div className="space-y-2">
-                                        <input
-                                            type="text"
-                                            placeholder="Name this preset..."
-                                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-base text-white focus:border-emerald-500 transition-all shadow-inner text-center"
-                                            autoFocus
-                                            value={presetName}
-                                            onChange={(e) => setPresetName(e.target.value)}
-                                        />
-                                    </div>
-                                    <div className="flex flex-col gap-3">
-                                        <button
-                                            type="submit"
-                                            className="w-full py-5 bg-emerald-500 text-black rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-emerald-500/20 active-scale"
-                                        >
-                                            Confirm & Save
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowSaveForm(false)}
-                                            className="w-full py-4 text-white/40 text-[10px] font-bold uppercase tracking-widest"
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Desktop Inline Form */}
-                    {showSaveForm && (
-                        <div className="hidden md:block p-2 border-b border-white/10 bg-emerald-500/5 animate-in slide-in-from-top-2 duration-200">
-                            <form
-                                onSubmit={(e) => {
-                                    e.preventDefault();
-                                    onSavePost(currentPostData, presetName);
-                                    setShowSaveForm(false);
+                            <span style={{
+                                flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                                fontSize: '13px', color: 'rgba(255,255,255,0.8)',
+                                fontFamily: 'var(--font-body, inherit)',
+                            }}>
+                                {post.name || post.topic || 'Untitled'}
+                            </span>
+                            <button
+                                onMouseDown={e => {
+                                    e.stopPropagation();
+                                    onDeletePreset(post.id);
                                 }}
-                                className="space-y-2"
+                                style={{
+                                    flexShrink: 0, width: '28px', height: '28px',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    background: 'none', border: 'none', cursor: 'pointer',
+                                    color: 'rgba(255,255,255,0.2)', borderRadius: '6px',
+                                    transition: 'all 0.1s',
+                                }}
+                                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgb(239,68,68)'; (e.currentTarget as HTMLButtonElement).style.background = 'rgba(239,68,68,0.12)'; }}
+                                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.2)'; (e.currentTarget as HTMLButtonElement).style.background = 'none'; }}
                             >
-                                <input
-                                    type="text"
-                                    placeholder="Name this preset..."
-                                    className="w-full bg-black/40 border border-white/10 rounded px-2 py-1 text-xs text-white focus:border-emerald-500/50 outline-none"
-                                    autoFocus
-                                    value={presetName}
-                                    onChange={(e) => setPresetName(e.target.value)}
-                                />
-                                <div className="flex gap-1">
-                                    <button type="submit" className="flex-1 py-1 bg-emerald-500 text-black rounded text-[10px] font-bold uppercase">Confirm</button>
-                                    <button type="button" onClick={() => setShowSaveForm(false)} className="px-2 py-1 bg-white/10 text-white rounded text-[10px]">Cancel</button>
-                                </div>
-                            </form>
+                                <Trash2 style={{ width: 13, height: 13 }} />
+                            </button>
                         </div>
-                    )}
+                    ))
+                )}
+            </div>
 
-                    {/* Presets List */}
-                    <div className="max-h-64 overflow-y-auto custom-scrollbar p-1 space-y-0.5">
-                        {filteredPresets.length === 0 ? (
-                            <div className="p-4 text-center text-white/20 text-[10px] uppercase font-bold tracking-widest">
-                                No {tab} presets
-                            </div>
-                        ) : (
-                            filteredPresets.slice(0, 10).map((post) => ( // Limit to 10 recent for dropdown
-                                <div key={post.id} className="group relative flex items-center justify-between px-3 py-2 hover:bg-white/5 rounded-lg transition-colors cursor-pointer"
-                                    onClick={() => onLoadPreset(post)}
-                                >
-                                    <span className="text-white/80 text-xs font-medium truncate pr-6">{post.name || post.topic || "Untitled"}</span>
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            onDeletePreset(post.id);
-                                        }}
-                                        className="opacity-0 group-hover:opacity-100 p-1 hover:text-red-400 text-white/20 transition-all absolute right-2"
-                                    >
-                                        <Trash2 className="w-3 h-3" />
-                                    </button>
-                                </div>
-                            ))
-                        )}
-                    </div>
-
-                    {filteredPresets.length > 10 && (
-                        <div className="p-2 border-t border-white/5 bg-black/20 text-center">
-                            <span className="text-[9px] text-white/30 italic">View all in Library</span>
-                        </div>
-                    )}
+            {filteredPresets.length > 10 && (
+                <div style={{ padding: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
+                    <span style={{ fontSize: '10px', color: 'rgba(255,255,255,0.25)', fontStyle: 'italic', fontFamily: 'var(--font-body, inherit)' }}>
+                        Showing 10 of {filteredPresets.length}
+                    </span>
                 </div>
             )}
+        </div>,
+        document.body
+    ) : null;
+
+    return (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+            <button
+                ref={triggerRef}
+                type="button"
+                style={triggerBtnStyle}
+                onClick={() => { setIsOpen(!isOpen); setShowSaveForm(false); }}
+                onMouseEnter={e => {
+                    if (!isOpen) {
+                        (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.2)';
+                        (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.7)';
+                    }
+                }}
+                onMouseLeave={e => {
+                    if (!isOpen) {
+                        (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.1)';
+                        (e.currentTarget as HTMLButtonElement).style.color = 'rgba(255,255,255,0.45)';
+                    }
+                }}
+            >
+                <BookMarked style={{ width: 12, height: 12 }} />
+                Presets
+                {isOpen
+                    ? <ChevronUp style={{ width: 11, height: 11 }} />
+                    : <ChevronDown style={{ width: 11, height: 11 }} />
+                }
+            </button>
+            {portal}
         </div>
     );
 }

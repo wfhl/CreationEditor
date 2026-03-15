@@ -10,10 +10,10 @@ interface CreatorHeaderProps {
 }
 
 const STEPS: { id: CreatorStep | 'editor'; label: string; num: number; icon?: React.ReactNode }[] = [
-    { id: 'create', label: 'Create (Image)', num: 1 },
-    { id: 'edit', label: 'Refine (Image)', num: 2 },
-    { id: 'scripts', label: 'Script (Dialog)', num: 3 },
-    { id: 'animate', label: 'Animate (I2V)', num: 4 },
+    { id: 'create', label: 'Create', num: 1 },
+    { id: 'edit', label: 'Refine', num: 2 },
+    { id: 'scripts', label: 'Script', num: 3 },
+    { id: 'animate', label: 'Animate', num: 4 },
 ];
 
 export function CreatorHeader({ activeTab, onTabChange, onSendToEditor, hasMedia }: CreatorHeaderProps) {
