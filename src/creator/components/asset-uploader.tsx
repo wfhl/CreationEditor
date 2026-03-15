@@ -91,37 +91,50 @@ export function AssetUploader({ assets, onAdd, onRemove, onToggleSelection, labe
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
+    const tabBtnBase: React.CSSProperties = {
+        padding: '5px 14px',
+        fontSize: '11px',
+        fontWeight: 700,
+        borderRadius: '6px',
+        textTransform: 'uppercase',
+        letterSpacing: '0.08em',
+        border: 'none',
+        cursor: 'pointer',
+        transition: 'all 0.15s',
+        whiteSpace: 'nowrap',
+    };
+
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <label className="text-[11px] font-bold text-white/40 uppercase tracking-widest">{label}</label>
-                    <div className="flex bg-white/5 rounded-lg p-0.5 border border-white/10">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {/* Row 1: label + add button */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <label style={{ fontSize: 'var(--creator-label-size)', fontWeight: 700, color: 'var(--creator-label-color)', textTransform: 'uppercase', letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>{label}</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {/* Tab toggle */}
+                    <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', padding: '3px', border: '1px solid rgba(255,255,255,0.08)', gap: '2px' }}>
                         <button
                             onClick={() => setViewMode('upload')}
-                            className={`px-3 py-1 text-[10px] rounded-md uppercase tracking-wider transition-all ${viewMode === 'upload' ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white'}`}
+                            style={{ ...tabBtnBase, background: viewMode === 'upload' ? 'rgba(255,255,255,0.12)' : 'transparent', color: viewMode === 'upload' ? 'rgb(52,211,153)' : 'rgba(255,255,255,0.35)' }}
                         >
                             Selected
                         </button>
                         <button
                             onClick={() => setViewMode('library')}
-                            className={`px-3 py-1 text-[10px] rounded-md uppercase tracking-wider transition-all ${viewMode === 'library' ? 'bg-white/10 text-white shadow-sm' : 'text-white/40 hover:text-white'}`}
+                            style={{ ...tabBtnBase, background: viewMode === 'library' ? 'rgba(255,255,255,0.12)' : 'transparent', color: viewMode === 'library' ? 'rgb(52,211,153)' : 'rgba(255,255,255,0.35)' }}
                         >
                             Library
                         </button>
                     </div>
-                </div>
-                <div className="flex items-center gap-2">
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 text-emerald-400 hover:text-white transition-all"
+                        style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', display: 'flex', alignItems: 'center', gap: '4px', color: 'rgb(52,211,153)', background: 'none', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' }}
                     >
                         <Plus className="h-3 w-3" />
-                        Add New
+                        Add
                     </button>
                 </div>
-                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handleFileChange} />
             </div>
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handleFileChange} />
 
             {viewMode === 'upload' ? (
                 <div className="max-h-[300px] overflow-y-auto pr-2">

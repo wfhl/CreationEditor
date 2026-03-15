@@ -124,22 +124,19 @@ export function AnimateTab({
     return (
         <div className="flex h-full w-full pointer-events-auto">
             {/* === LEFT COLUMN: CONTROLS === */}
-            <div className="w-[360px] flex-shrink-0 flex flex-col h-full bg-[var(--surface)] border-r border-[var(--border)] relative overflow-y-auto">
-                <div className="px-6 py-6 flex-1 flex flex-col gap-6">
-                    <div className="flex items-center justify-between pb-8 border-b border-[var(--border)] mb-6">
-                        <div className="flex items-center gap-5 px-2 pt-2">
-                            <h2 className="text-sm font-black text-white uppercase tracking-[0.15em] flex items-center gap-4">
-                                <div className="p-2.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                                    <VideoIcon className="w-5 h-5 text-emerald-500" />
-                                </div>
-                                Setup
-                            </h2>
+            <div className="creator-panel">
+                <div className="creator-panel-body">
+                    {/* Header */}
+                    <div className="creator-panel-header">
+                        <div className="creator-panel-header-icon">
+                            <VideoIcon className="w-4 h-4 text-emerald-500" />
                         </div>
+                        <span className="creator-panel-title">Setup</span>
                     </div>
 
                     {/* Source Media */}
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-bold text-white/40 uppercase tracking-widest block">Source Image</label>
+                    <div className="creator-field">
+                        <label className="creator-label">Source Image</label>
                         {i2vTarget ? (
                             <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-emerald-500/30 shadow-lg group">
                                 <img src={i2vTarget.url} alt="Source" className="w-full h-full object-cover" />
@@ -152,112 +149,114 @@ export function AnimateTab({
                                 </div>
                             </div>
                         ) : (
-                            <label className="flex flex-col items-center justify-center aspect-video w-full border-2 border-dashed border-white/10 bg-white/5 rounded-xl cursor-pointer hover:bg-white/10 hover:border-emerald-500/50 transition-all group">
-                                <Upload className="w-6 h-6 text-white/20 group-hover:text-emerald-400 mb-2" />
-                                <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest">Upload Image</span>
+                            <label className="creator-upload-zone">
+                                <Upload className="w-5 h-5 creator-upload-zone-icon" />
+                                <span className="creator-upload-zone-label">Upload Image</span>
                                 <input type="file" className="hidden" accept="image/*" onChange={handleI2VImageUpload} />
                             </label>
                         )}
                     </div>
 
                     {/* AI Model & Params */}
-                    <div className="space-y-4">
-                        <div className="space-y-1">
-                            <label className="text-[10px] text-white/40 uppercase tracking-widest block">AI Model Engine</label>
-                            <div className="relative">
+                    <div className="creator-field">
+                        <label className="creator-label">AI Model Engine</label>
+                        <div className="creator-select-wrap">
+                            <select
+                                value={selectedModel}
+                                onChange={(e) => setSelectedModel(e.target.value)}
+                                className="creator-select"
+                            >
+                                <option value="wan/v2.6/image-to-video/flash">Wan 2.6 Flash</option>
+                                <option value="fal-ai/wan-25-preview/image-to-video">Wan 2.5 Preview</option>
+                                <option value="fal-ai/bytedance/seedance/v1.5/pro/image-to-video">Seedance 1.5 Pro</option>
+                                <option value="xai/grok-imagine-video/image-to-video">Grok 2 Video</option>
+                                <option value="veo-3.1-generate-preview">Veo 3.1 (Google)</option>
+                            </select>
+                            <ChevronDown className="w-3 h-3 creator-chevron" />
+                        </div>
+                    </div>
+
+                    <div className="creator-field-grid">
+                        <div className="creator-field">
+                            <label className="creator-label">Resolution</label>
+                            <div className="creator-select-wrap">
                                 <select
-                                    value={selectedModel}
-                                    onChange={(e) => setSelectedModel(e.target.value)}
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-2 text-xs text-white appearance-none focus:outline-none focus:border-emerald-500/50"
+                                    value={videoResolution}
+                                    onChange={(e) => setVideoResolution(e.target.value)}
+                                    className="creator-select"
                                 >
-                                    <option value="wan/v2.6/image-to-video/flash">Wan 2.6 Flash</option>
-                                    <option value="fal-ai/wan-25-preview/image-to-video">Wan 2.5 Preview</option>
-                                    <option value="fal-ai/bytedance/seedance/v1.5/pro/image-to-video">Seedance 1.5 Pro</option>
-                                    <option value="xai/grok-imagine-video/image-to-video">Grok 2 Video</option>
-                                    <option value="veo-3.1-generate-preview">Veo 3.1 (Google)</option>
+                                    <option value="1080p">1080p</option>
+                                    <option value="720p">720p</option>
+                                    <option value="480p">480p</option>
                                 </select>
-                                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40 pointer-events-none" />
+                                <ChevronDown className="w-3 h-3 creator-chevron" />
                             </div>
                         </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className="space-y-1">
-                                <label className="text-[10px] text-white/40 uppercase tracking-widest block">Resolution</label>
-                                <div className="relative">
-                                    <select
-                                        value={videoResolution}
-                                        onChange={(e) => setVideoResolution(e.target.value)}
-                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-2 text-xs text-white appearance-none"
-                                    >
-                                        <option value="1080p">1080p</option>
-                                        <option value="720p">720p</option>
-                                        <option value="480p">480p</option>
-                                    </select>
-                                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40 pointer-events-none" />
-                                </div>
-                            </div>
-                            <div className="space-y-1">
-                                <label className="text-[10px] text-white/40 uppercase tracking-widest block">Length</label>
-                                <div className="relative">
-                                    <select
-                                        value={videoDuration}
-                                        onChange={(e) => setVideoDuration(e.target.value)}
-                                        className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-2 text-xs text-white appearance-none"
-                                    >
-                                        <option value="5s">5s</option>
-                                        <option value="10s">10s</option>
-                                        <option value="15s">15s</option>
-                                    </select>
-                                    <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40 pointer-events-none" />
-                                </div>
+                        <div className="creator-field">
+                            <label className="creator-label">Length</label>
+                            <div className="creator-select-wrap">
+                                <select
+                                    value={videoDuration}
+                                    onChange={(e) => setVideoDuration(e.target.value)}
+                                    className="creator-select"
+                                >
+                                    <option value="5s">5s</option>
+                                    <option value="10s">10s</option>
+                                    <option value="15s">15s</option>
+                                </select>
+                                <ChevronDown className="w-3 h-3 creator-chevron" />
                             </div>
                         </div>
+                    </div>
 
-                        <div className="space-y-1">
-                            <label className="text-[10px] text-white/40 uppercase tracking-widest block">Aspect Ratio</label>
-                            <div className="relative">
-                                <select
-                                    value={i2vAspectRatio}
-                                    onChange={(e) => setI2VAspectRatio(e.target.value)}
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-2 py-2 text-xs text-white appearance-none"
-                                >
-                                    <option value="auto">Auto (Matches Image)</option>
-                                    <option value="16:9">16:9 Landscape</option>
-                                    <option value="9:16">9:16 Vertical</option>
-                                    <option value="1:1">1:1 Square</option>
-                                </select>
-                                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-white/40 pointer-events-none" />
-                            </div>
+                    <div className="creator-field">
+                        <label className="creator-label">Aspect Ratio</label>
+                        <div className="creator-select-wrap">
+                            <select
+                                value={i2vAspectRatio}
+                                onChange={(e) => setI2VAspectRatio(e.target.value)}
+                                className="creator-select"
+                            >
+                                <option value="auto">Auto (Matches Image)</option>
+                                <option value="16:9">16:9 Landscape</option>
+                                <option value="9:16">9:16 Vertical</option>
+                                <option value="1:1">1:1 Square</option>
+                            </select>
+                            <ChevronDown className="w-3 h-3 creator-chevron" />
                         </div>
                     </div>
 
                     {/* Seedance Options */}
                     {selectedModel.includes('seedance') && (
-                        <div className="grid grid-cols-2 gap-2 border-t border-white/5 pt-4">
-                            <label className="flex items-center gap-2 cursor-pointer p-1.5 rounded hover:bg-white/5 transition-colors">
-                                <input type="checkbox" checked={withAudio} onChange={(e) => setWithAudio?.(e.target.checked)} className="w-3 h-3 rounded bg-black/40 border-white/20 text-emerald-500 focus:ring-emerald-500/50" />
-                                <span className="text-[10px] text-white/60 uppercase tracking-widest font-bold">Audio</span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer p-1.5 rounded hover:bg-white/5 transition-colors">
-                                <input type="checkbox" checked={cameraFixed} onChange={(e) => setCameraFixed?.(e.target.checked)} className="w-3 h-3 rounded bg-black/40 border-white/20 text-emerald-500 focus:ring-emerald-500/50" />
-                                <span className="text-[10px] text-white/60 uppercase tracking-widest font-bold">Fix Cam</span>
-                            </label>
+                        <div className="creator-field">
+                            <div className="creator-section-divider" />
+                            <div className="flex gap-2">
+                                <label className="creator-checkbox-label flex-1">
+                                    <input type="checkbox" checked={withAudio} onChange={(e) => setWithAudio?.(e.target.checked)} />
+                                    <span>Audio</span>
+                                </label>
+                                <label className="creator-checkbox-label flex-1">
+                                    <input type="checkbox" checked={cameraFixed} onChange={(e) => setCameraFixed?.(e.target.checked)} />
+                                    <span>Fix Camera</span>
+                                </label>
+                            </div>
                         </div>
                     )}
 
                     {/* LoRA Controls */}
                     {selectedModel.includes('lora') && (
-                        <div className="border-t border-[var(--border)] pt-4 space-y-3">
+                        <div className="creator-field">
+                            <div className="creator-section-divider" />
                             <div className="flex justify-between items-center">
-                                <label className="text-[10px] text-white/50 font-bold uppercase tracking-widest flex items-center gap-1"><Layers className="w-3 h-3 text-emerald-500" /> LoRAs</label>
-                                <button onClick={() => setLoras([...loras, { path: '', scale: 1.0 }])} className="text-[9px] text-emerald-400 font-bold uppercase">Add</button>
+                                <label className="creator-label"><Layers className="w-3 h-3 text-emerald-500" /> LoRAs</label>
+                                <button onClick={() => setLoras([...loras, { path: '', scale: 1.0 }])} className="text-[9px] text-emerald-400 font-bold uppercase tracking-widest hover:text-emerald-300 transition-colors">+ Add</button>
                             </div>
-                            <div className="space-y-2">
+                            <div className="flex flex-col gap-2">
                                 {loras.map((lora, idx) => (
-                                    <div key={idx} className="bg-black/20 border border-white/5 rounded-lg p-2 space-y-2">
+                                    <div key={idx} className="bg-black/20 border border-white/5 rounded-lg p-2.5 space-y-2">
                                         <div className="flex justify-between items-center gap-2">
-                                            <input type="text" placeholder="URL" value={lora.path} onChange={(e) => { const nl = [...loras]; nl[idx].path = e.target.value; setLoras(nl); }} className="flex-1 bg-black/40 border border-white/10 rounded px-2 py-1 text-[9px] text-white outline-none" />
-                                            <button onClick={() => setLoras(loras.filter((_, i) => i !== idx))} className="text-red-400"><Trash2 className="w-3 h-3" /></button>
+                                            <input type="text" placeholder="URL" value={lora.path} onChange={(e) => { const nl = [...loras]; nl[idx].path = e.target.value; setLoras(nl); }} className="flex-1 bg-black/40 border border-white/10 rounded px-2 py-1.5 text-[10px] text-white outline-none focus:border-emerald-500/50" />
+                                            <button onClick={() => setLoras(loras.filter((_, i) => i !== idx))} className="text-red-400 hover:text-red-300 p-1"><Trash2 className="w-3 h-3" /></button>
                                         </div>
                                         <input type="range" min="0" max="2" step="0.05" value={lora.scale} onChange={(e) => { const nl = [...loras]; nl[idx].scale = parseFloat(e.target.value); setLoras(nl); }} className="w-full h-1 bg-white/10 rounded appearance-none cursor-pointer accent-emerald-500" />
                                     </div>
@@ -268,7 +267,7 @@ export function AnimateTab({
                 </div>
 
                 {/* Left Action Bottom */}
-                <div className="p-4 border-t border-[var(--border)] bg-[var(--surface-2)] sticky bottom-0 z-10 flex flex-col gap-2">
+                <div className="creator-panel-footer">
                     {(() => {
                         const needsFal = !!selectedModel.toLowerCase().match(/grok|seedance|wan|fal/i);
                         const missingFal = needsFal && !apiKeys.fal;
@@ -280,13 +279,13 @@ export function AnimateTab({
                                 <button
                                     onClick={onGenerateI2V}
                                     disabled={isDisabled}
-                                    className={`w-full py-3 rounded-lg text-xs font-bold uppercase tracking-widest transition-all shadow-lg flex items-center justify-center gap-2 ${isDisabled ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-black shadow-emerald-500/20 hover:-translate-y-0.5'}`}
+                                    className="creator-btn-primary"
                                 >
                                     {isGeneratingI2V ? <Loader2 className="w-4 h-4 animate-spin" /> : <VideoIcon className="w-4 h-4" />}
                                     {isGeneratingI2V ? "Animating..." : "Animate Media"}
                                 </button>
-                                {missingFal && <p className="text-[8px] font-bold text-red-400 uppercase tracking-tight text-center animate-pulse">Fal.ai Key Required</p>}
-                                {missingGemini && <p className="text-[8px] font-bold text-red-400 uppercase tracking-tight text-center animate-pulse">Gemini Key Required</p>}
+                                {missingFal && <p className="creator-key-warning">Fal.ai Key Required in Settings</p>}
+                                {missingGemini && <p className="creator-key-warning">Gemini Key Required in Settings</p>}
                             </>
                         );
                     })()}
