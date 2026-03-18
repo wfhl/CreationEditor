@@ -217,21 +217,18 @@ export function SettingsTab({
     return (
         <div className="flex h-full w-full pointer-events-auto bg-[var(--bg-deep)]">
             {/* ═══════════════════ LEFT PANEL: NAVIGATION ═══════════════════ */}
-            <div className="creator-panel">
-                <div className="creator-panel-body">
+            <div className="creator-panel"> <div className="creator-panel-body">
                     {/* Header */}
-                    <div className="creator-panel-header">
-                        <div className="creator-panel-header-icon">
+                    <div className="creator-panel-header"> <div className="creator-panel-header-icon">
                             <Settings className="w-4 h-4 text-emerald-500" />
                         </div>
                         <div>
-                            <p className="creator-panel-title">Configuration</p>
-                            <p className="creator-content-subtitle !mt-1">Studio System Settings</p>
+                            <p className="creator-panel-title">Configuration</p> <p className="creator-content-subtitle !mt-1">Studio System Settings</p>
                         </div>
                     </div>
 
                     {/* Navigation Tabs */}
-                    <div className="flex flex-col gap-3 mt-6">
+                    <div className="flex flex-col mt-4" style={{ gap: "8px" }}>
                         {[
                             { id: 'credentials', label: 'API Credentials', icon: Key },
                             { id: 'persona', label: 'Core Persona', icon: Cloud },
@@ -243,7 +240,8 @@ export function SettingsTab({
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveSection(tab.id as any)}
-                                    className={`flex items-center gap-4 px-6 py-4 rounded-xl transition-all font-bold text-[11px] uppercase tracking-widest ${activeSection === tab.id
+                                    style={{ padding: '14px 20px' }}
+                                    className={`flex items-center gap-3 rounded-xl transition-all font-bold text-[11px] uppercase tracking-widest ${activeSection === tab.id
                                         ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-lg shadow-emerald-500/5'
                                         : 'text-white/20 hover:bg-white/5 hover:text-white/40'
                                     }`}
@@ -255,22 +253,19 @@ export function SettingsTab({
                         })}
                     </div>
 
-                    <div className="creator-section-divider" />
+                    <div className="creator-section-divider" style={{ margin: '16px 0' }} />
 
                     {/* Library Tools */}
-                    <div className="space-y-4 mt-8">
-                        <label className="creator-label px-1">Library Maintenance</label>
-                        <div className="creator-field !mb-0">
-                            <button
-                                onClick={handleOptimizeLibrary}
-                                disabled={isOptimizing}
-                                className="creator-btn-primary !bg-white/5 hover:!bg-white/10 !border-white/10 !text-white/40 !text-[11px] !py-4"
-                            >
-                                {isOptimizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                                {isOptimizing ? 'Optimizing...' : 'Optimize Library'}
-                            </button>
-                        </div>
-                        {optProgress && <p className="text-[9px] text-emerald-500/40 font-medium italic text-center animate-pulse">{optProgress}</p>}
+                    <div className="creator-field"> <label className="creator-label">Library Maintenance</label>
+                        <button
+                            onClick={handleOptimizeLibrary}
+                            disabled={isOptimizing}
+                            className="creator-btn-primary w-full justify-center !bg-white/5 hover:!bg-white/10 !border-white/10 !text-white/40 !text-[11px]"
+                        >
+                            {isOptimizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                            {isOptimizing ? 'Optimizing...' : 'Optimize Library'}
+                        </button>
+                        {optProgress && <p className="text-[9px] text-emerald-500/60 font-medium italic text-center animate-pulse mt-2">{optProgress}</p>}
                     </div>
 
                 </div>
@@ -280,7 +275,7 @@ export function SettingsTab({
                     <button
                         onClick={handleMigration}
                         disabled={isMigrating}
-                        className="creator-btn-primary !bg-purple-600/10 hover:!bg-purple-600/20 !border-purple-500/20 !text-purple-400 !font-black !tracking-[0.15em] !py-4"
+                        className="creator-btn-primary w-full justify-center !bg-purple-600/10 hover:!bg-purple-600/20 !border-purple-500/20 !text-purple-400 !font-black !tracking-[0.1em]"
                     >
                         <Cloud className="w-4 h-4" />
                         {isMigrating ? migrationStatus : 'Cloud Export Migration'}
@@ -292,13 +287,10 @@ export function SettingsTab({
             <div className="creator-content-panel">
                 {/* Section Content */}
                 <div className="creator-content-body">
-                    {/* Page Header (Now INSIDE body for perfect max-width alignment) */}
-                    <div className="creator-content-header !p-0 !mb-8">
-                        <div className="creator-content-title-wrap">
-                            <div className="creator-content-icon">
-                                {activeSection === 'credentials' && <Key className="w-5 h-5 text-emerald-500" />}
-                                {activeSection === 'persona' && <Cloud className="w-5 h-5 text-emerald-500" />}
-                                {activeSection === 'themes' && <RefreshCw className="w-5 h-5 text-emerald-500" />}
+                    {/* Page Header */}
+                    <div className="creator-content-header"> <div className="creator-content-title-wrap">
+                            <div className="creator-content-icon"> {activeSection === 'credentials' && <Key className="w-5 h-5 text-emerald-500" />}
+                                {activeSection === 'persona' && <Cloud className="w-5 h-5 text-emerald-500" />} {activeSection === 'themes' && <RefreshCw className="w-5 h-5 text-emerald-500" />}
                                 {activeSection === 'captions' && <Save className="w-5 h-5 text-emerald-500" />}
                             </div>
                             <div>
@@ -318,9 +310,8 @@ export function SettingsTab({
                         </div>
                     </div>
                     {activeSection === 'themes' && (
-                        <div className="space-y-12">
-                            <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                                <span className="creator-result-title">Visual Design Themes</span>
+                        <div>
+                            <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4"> <span className="creator-result-title">Visual Design Themes</span>
                                 <button
                                     onClick={() => startEditTheme('new')}
                                     className="creator-result-action !text-emerald-400"
@@ -329,20 +320,18 @@ export function SettingsTab({
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-4">
+                            <div className="grid grid-cols-1 " style={{ gap: "16px" }}>
                                 {themes.map(theme => (
-                                    <div key={theme.id} className="bg-black/20 border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-all">
-                                        <div className="p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors cursor-pointer"
+                                    <div key={theme.id} className="bg-black/20 border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-all"> <div className="flex items-center justify-between hover:bg-white/[0.02] transition-colors cursor-pointer" style={{ padding: "24px" }}
                                             onClick={() => editingThemeId === theme.id ? setEditingThemeId(null) : startEditTheme(theme)}
                                         >
-                                            <div className="space-y-1">
-                                                <h4 className="font-bold text-white text-[13px] tracking-wide">{theme.name}</h4>
+                                            <div className="space-y-1"> <h4 className="font-bold text-white text-[13px] tracking-wide">{theme.name}</h4>
                                                 <p className="text-[11px] text-white/30 font-medium">{theme.description}</p>
                                             </div>
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-center " style={{ gap: "12px" }}>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleDeleteTheme(theme.id); }}
-                                                    className="p-2.5 hover:bg-red-500/10 text-white/20 hover:text-red-400 rounded-xl transition-all"
+                                                    className="p-[10px] hover:bg-red-500/10 text-white/20 hover:text-red-400 rounded-xl transition-all"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
@@ -351,18 +340,15 @@ export function SettingsTab({
                                         </div>
 
                                         {editingThemeId === theme.id && tempTheme && (
-                                            <div className="px-8 pb-8 pt-2 space-y-6 animate-in slide-in-from-top-2 duration-300">
-                                                <div className="grid grid-cols-2 gap-6">
-                                                    <div className="creator-field">
-                                                        <label className="creator-label">Theme Name</label>
+                                            <div className="space-y-6 animate-in slide-in-from-top-2 duration-300" style={{ padding: "8px 32px 32px" }}> <div className="grid grid-cols-2 ga" style={{ padding: "24px" }}>
+                                                    <div className="creator-field"> <label className="creator-label">Theme Name</label>
                                                         <input
                                                             value={tempTheme.name}
                                                             onChange={e => setTempTheme({ ...tempTheme, name: e.target.value })}
                                                             className="creator-input"
                                                         />
                                                     </div>
-                                                    <div className="creator-field">
-                                                        <label className="creator-label">Short Description</label>
+                                                    <div className="creator-field"> <label className="creator-label">Short Description</label>
                                                         <input
                                                             value={tempTheme.description}
                                                             onChange={e => setTempTheme({ ...tempTheme, description: e.target.value })}
@@ -370,8 +356,7 @@ export function SettingsTab({
                                                         />
                                                     </div>
                                                 </div>
-                                                <div className="creator-field">
-                                                    <label className="creator-label">Base Prompt Template</label>
+                                                <div className="creator-field"> <label className="creator-label">Base Prompt Template</label>
                                                     <textarea
                                                         value={tempTheme.basePrompt}
                                                         onChange={e => setTempTheme({ ...tempTheme, basePrompt: e.target.value })}
@@ -379,8 +364,7 @@ export function SettingsTab({
                                                         className="creator-textarea"
                                                     />
                                                 </div>
-                                                <div className="grid grid-cols-2 gap-6">
-                                                    <div className="creator-field">
+                                                <div className="grid grid-cols-2 ga" style={{ padding: "24px" }}> <div className="creator-field">
                                                         <label className="creator-label">Default Outfit</label>
                                                         <input
                                                             value={tempTheme.defaultOutfit || ''}
@@ -388,8 +372,7 @@ export function SettingsTab({
                                                             className="creator-input"
                                                         />
                                                     </div>
-                                                    <div className="creator-field">
-                                                        <label className="creator-label">Default Local/Visuals</label>
+                                                    <div className="creator-field"> <label className="creator-label">Default Local/Visuals</label>
                                                         <input
                                                             value={tempTheme.defaultSetting || tempTheme.defaultVisuals || ''}
                                                             onChange={e => setTempTheme({ ...tempTheme, defaultSetting: e.target.value, defaultVisuals: e.target.value })}
@@ -397,7 +380,7 @@ export function SettingsTab({
                                                         />
                                                     </div>
                                                 </div>
-                                                <div className="flex justify-end gap-3 pt-4">
+                                                <div className="flex justify-end pt-4" style={{ gap: "12px" }}>
                                                     <button
                                                         onClick={() => { setEditingThemeId(null); setTempTheme(null); }}
                                                         className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white/20 hover:text-white/60 transition-colors"
@@ -417,13 +400,11 @@ export function SettingsTab({
                                 ))}
 
                                 {editingThemeId === 'new' && tempTheme && (
-                                    <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-8 space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <Plus className="w-5 h-5 text-emerald-400" />
-                                            <h4 className="text-emerald-400 font-bold uppercase text-[12px] tracking-widest">Initialize New Creative Theme</h4>
+                                    <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl space-y-6 animate-in slide-in-from-bottom-4 duration-500" style={{ padding: "32px" }}>
+                                        <div className="flex items-center mb-2" style={{ gap: "12px" }}>
+                                            <Plus className="w-5 h-5 text-emerald-400" /> <h4 className="text-emerald-400 font-bold uppercase text-[12px] tracking-widest">Initialize New Creative Theme</h4>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-6">
-                                            <div className="creator-field">
+                                        <div className="grid grid-cols-2 ga" style={{ padding: "24px" }}> <div className="creator-field">
                                                 <label className="creator-label">Name</label>
                                                 <input
                                                     value={tempTheme.name}
@@ -432,8 +413,7 @@ export function SettingsTab({
                                                     autoFocus
                                                 />
                                             </div>
-                                            <div className="creator-field">
-                                                <label className="creator-label">Description</label>
+                                            <div className="creator-field"> <label className="creator-label">Description</label>
                                                 <input
                                                     value={tempTheme.description}
                                                     onChange={e => setTempTheme({ ...tempTheme, description: e.target.value })}
@@ -441,18 +421,15 @@ export function SettingsTab({
                                                 />
                                             </div>
                                         </div>
-                                        <div className="creator-field">
-                                            <label className="creator-label">Base Prompt Template</label>
+                                        <div className="creator-field"> <label className="creator-label">Base Prompt Template</label>
                                             <textarea
                                                 value={tempTheme.basePrompt}
                                                 onChange={e => setTempTheme({ ...tempTheme, basePrompt: e.target.value })}
                                                 rows={4}
-                                                className="creator-textarea"
-                                                placeholder="Use [Subject Definition], [Outfit], [Setting] placeholders..."
+                                                className="creator-textarea" placeholder="Use [Subject Definition], [Outfit], [Setting] placeholders..."
                                             />
                                         </div>
-                                        <div className="grid grid-cols-2 gap-6">
-                                            <div className="creator-field">
+                                        <div className="grid grid-cols-2 ga" style={{ padding: "24px" }}> <div className="creator-field">
                                                 <label className="creator-label">Default Outfit</label>
                                                 <input
                                                     value={tempTheme.defaultOutfit || ''}
@@ -460,8 +437,7 @@ export function SettingsTab({
                                                     className="creator-input"
                                                 />
                                             </div>
-                                            <div className="creator-field">
-                                                <label className="creator-label">Default Setting</label>
+                                            <div className="creator-field"> <label className="creator-label">Default Setting</label>
                                                 <input
                                                     value={tempTheme.defaultSetting || tempTheme.defaultVisuals || ''}
                                                     onChange={e => setTempTheme({ ...tempTheme, defaultSetting: e.target.value, defaultVisuals: e.target.value })}
@@ -469,7 +445,7 @@ export function SettingsTab({
                                                 />
                                             </div>
                                         </div>
-                                        <div className="flex justify-end gap-3 pt-4">
+                                        <div className="flex justify-end pt-4" style={{ gap: "12px" }}>
                                             <button
                                                 onClick={() => { setEditingThemeId(null); setTempTheme(null); }}
                                                 className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white/20 hover:text-white/60 transition-colors"
@@ -490,9 +466,8 @@ export function SettingsTab({
                     )}
 
                     {activeSection === 'captions' && (
-                        <div className="space-y-12">
-                            <div className="flex justify-between items-center border-b border-white/5 pb-4">
-                                <span className="creator-result-title">Style Strategies</span>
+                        <div>
+                            <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4"> <span className="creator-result-title">Style Strategies</span>
                                 <button
                                     onClick={() => startEditStyle('new')}
                                     className="creator-result-action !text-emerald-400"
@@ -501,20 +476,18 @@ export function SettingsTab({
                                 </button>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-4">
+                            <div className="grid grid-cols-1 " style={{ gap: "16px" }}>
                                 {captionStyles.map(style => (
-                                    <div key={style.id} className="bg-black/20 border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-all">
-                                        <div className="p-6 flex items-center justify-between hover:bg-white/[0.02] transition-colors cursor-pointer"
+                                    <div key={style.id} className="bg-black/20 border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-all"> <div className="flex items-center justify-between hover:bg-white/[0.02] transition-colors cursor-pointer" style={{ padding: "24px" }}
                                             onClick={() => editingStyleId === style.id ? setEditingStyleId(null) : startEditStyle(style)}
                                         >
-                                            <div className="space-y-1">
-                                                <h4 className="font-bold text-white text-[13px] tracking-wide">{style.label}</h4>
+                                            <div className="space-y-1"> <h4 className="font-bold text-white text-[13px] tracking-wide">{style.label}</h4>
                                                 <p className="text-[11px] text-white/30 font-medium truncate max-w-xl">{style.prompt}</p>
                                             </div>
-                                            <div className="flex items-center gap-3">
+                                            <div className="flex items-center " style={{ gap: "12px" }}>
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); handleDeleteStyle(style.id); }}
-                                                    className="p-2.5 hover:bg-red-500/10 text-white/20 hover:text-red-400 rounded-xl transition-all"
+                                                    className="p-[10px] hover:bg-red-500/10 text-white/20 hover:text-red-400 rounded-xl transition-all"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>
@@ -523,8 +496,7 @@ export function SettingsTab({
                                         </div>
 
                                         {editingStyleId === style.id && tempStyle && (
-                                            <div className="px-8 pb-8 pt-2 space-y-6 animate-in slide-in-from-top-2 duration-300">
-                                                <div className="creator-field">
+                                            <div className="space-y-6 animate-in slide-in-from-top-2 duration-300" style={{ padding: "8px 32px 32px" }}> <div className="creator-field">
                                                     <label className="creator-label">Strategy Label</label>
                                                     <input
                                                         value={tempStyle.label}
@@ -532,8 +504,7 @@ export function SettingsTab({
                                                         className="creator-input"
                                                     />
                                                 </div>
-                                                <div className="creator-field">
-                                                    <label className="creator-label">System Instruction / Prompt Blueprint</label>
+                                                <div className="creator-field"> <label className="creator-label">System Instruction / Prompt Blueprint</label>
                                                     <textarea
                                                         value={tempStyle.prompt}
                                                         onChange={e => setTempStyle({ ...tempStyle, prompt: e.target.value })}
@@ -541,7 +512,7 @@ export function SettingsTab({
                                                         className="creator-textarea"
                                                     />
                                                 </div>
-                                                <div className="flex justify-end gap-3 pt-2">
+                                                <div className="flex justify-end pt-2" style={{ gap: "12px" }}>
                                                     <button
                                                         onClick={() => { setEditingStyleId(null); setTempStyle(null); }}
                                                         className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white/20 hover:text-white/60 transition-colors"
@@ -561,13 +532,11 @@ export function SettingsTab({
                                 ))}
 
                                 {editingStyleId === 'new' && tempStyle && (
-                                    <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl p-8 space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <Plus className="w-5 h-5 text-emerald-400" />
-                                            <h4 className="text-emerald-400 font-bold uppercase text-[12px] tracking-widest">New Strategy</h4>
+                                    <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-2xl space-y-6 animate-in slide-in-from-bottom-4 duration-500" style={{ padding: "32px" }}>
+                                        <div className="flex items-center mb-2" style={{ gap: "12px" }}>
+                                            <Plus className="w-5 h-5 text-emerald-400" /> <h4 className="text-emerald-400 font-bold uppercase text-[12px] tracking-widest">New Strategy</h4>
                                         </div>
-                                        <div className="creator-field">
-                                            <label className="creator-label">Label</label>
+                                        <div className="creator-field"> <label className="creator-label">Label</label>
                                             <input
                                                 value={tempStyle.label}
                                                 onChange={e => setTempStyle({ ...tempStyle, label: e.target.value })}
@@ -575,17 +544,15 @@ export function SettingsTab({
                                                 autoFocus
                                             />
                                         </div>
-                                        <div className="creator-field">
-                                            <label className="creator-label">System Instruction / Prompt</label>
+                                        <div className="creator-field"> <label className="creator-label">System Instruction / Prompt</label>
                                             <textarea
                                                 value={tempStyle.prompt}
                                                 onChange={e => setTempStyle({ ...tempStyle, prompt: e.target.value })}
                                                 rows={5}
-                                                className="creator-textarea"
-                                                placeholder="Describe how the caption should be written..."
+                                                className="creator-textarea" placeholder="Describe how the caption should be written..."
                                             />
                                         </div>
-                                        <div className="flex justify-end gap-3 pt-4">
+                                        <div className="flex justify-end pt-4" style={{ gap: "12px" }}>
                                             <button
                                                 onClick={() => { setEditingStyleId(null); setTempStyle(null); }}
                                                 className="px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest text-white/20 hover:text-white/60 transition-colors"
@@ -606,46 +573,42 @@ export function SettingsTab({
                     )}
 
                     {activeSection === 'persona' && (
-                        <div className="space-y-12">
-                            <div className="space-y-8">
-                                <div className="creator-field !mb-10">
+                        <div>
+                            <div>
+                                <div className="creator-field" style={{ marginBottom: "32px" }}>
                                     <label className="creator-label">Base Subject Definition</label>
                                     <textarea
                                         value={localProfile.subject}
                                         onChange={e => setLocalProfile({ ...localProfile, subject: e.target.value })}
                                         rows={6}
-                                        className="creator-textarea font-serif italic !text-[15px]"
-                                        placeholder="Describe the core persona (face, age, hair, mood)..."
+                                        className="creator-textarea font-serif italic !text-[15px]" placeholder="Describe the core persona (face, age, hair, mood)..."
                                     />
-                                    <p className="text-[10px] text-white/20 font-medium italic mt-3 px-1">This is the [Subject Definition] used in all automated prompts. Keep it consistent for best results.</p>
+                                    <p className="text-[10px] text-white/20 font-medium italic" style={{ marginTop: "12px", padding: "0 4px" }}>This is the [Subject Definition] used in all automated prompts. Keep it consistent for best results.</p>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: "32px", marginBottom: "32px" }}>
                                     <div className="creator-field">
                                         <label className="creator-label">Global Negative Prompt</label>
                                         <textarea
                                             value={localProfile.negativePrompt}
                                             onChange={e => setLocalProfile({ ...localProfile, negativePrompt: e.target.value })}
                                             rows={4}
-                                            className="creator-textarea font-mono"
-                                            placeholder="Enter negative prompts to avoid globally..."
+                                            className="creator-textarea font-mono" placeholder="Enter negative prompts to avoid globally..."
                                         />
                                     </div>
-                                    <div className="creator-field">
-                                        <label className="creator-label">Engine Default Parameters</label>
+                                    <div className="creator-field"> <label className="creator-label">Engine Default Parameters</label>
                                         <textarea
                                             value={localProfile.defaultParams || ""}
                                             onChange={e => setLocalProfile({ ...localProfile, defaultParams: e.target.value })}
                                             rows={4}
-                                            className="creator-textarea"
-                                            placeholder="e.g. --v 6.1 --stylize 300"
+                                            className="creator-textarea" placeholder="e.g. --v 6.1 --stylize 300"
                                         />
                                     </div>
                                 </div>
 
-                                <div className="creator-field">
+                                <div className="creator-field" style={{ marginBottom: "40px" }}>
                                     <label className="creator-label">Subject Identity References</label>
-                                    <div className="bg-black/20 border border-white/5 rounded-3xl p-6">
+                                    <div className="bg-black/20 border border-white/5 rounded-3xl" style={{ padding: "32px" }}>
                                         <AssetUploader
                                             assets={assets}
                                             onAdd={onAssetsAdd}
@@ -656,7 +619,7 @@ export function SettingsTab({
                                     </div>
                                 </div>
 
-                                <div className="pt-8">
+                                <div style={{ paddingTop: "16px" }}>
                                     <button
                                         onClick={() => {
                                             setProfile(localProfile);
@@ -672,94 +635,86 @@ export function SettingsTab({
                     )}
 
                     {activeSection === 'credentials' && (
-                        <div className="space-y-16">
-                            <div className="space-y-16">
-                                {/* Google Gemini */}
-                                <div className="space-y-10">
-                                    <div className="flex items-center gap-4 border-b border-white/5 pb-5">
-                                        <div className="p-2.5 bg-purple-500/10 rounded-xl border border-purple-500/20">
-                                            <Key className="w-5 h-5 text-purple-400" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-white text-[15px] tracking-wide">Google Gemini API</h4>
-                                            <p className="text-[10px] text-purple-400/60 uppercase tracking-widest font-black">Reasoning & Captioning Engine</p>
-                                        </div>
+                        <div>
+                            {/* Google Gemini */}
+                            <div className="creator-field">
+                                <div className="flex items-center border-b border-white/5" style={{ marginBottom: "24px", paddingBottom: "24px", gap: "20px" }}>
+                                    <div className="bg-purple-500/10 rounded-xl border border-purple-500/20 flex-shrink-0" style={{ padding: "12px" }}>
+                                        <Key className="w-5 h-5 text-purple-400" />
                                     </div>
-
-                                    <div className="creator-field">
-                                        <div className="relative group">
-                                            <input
-                                                type={showGemini ? "text" : "password"}
-                                                value={localKeys.gemini}
-                                                onChange={e => setLocalKeys({ ...localKeys, gemini: e.target.value })}
-                                                placeholder="Enter your Gemini Pro Key..."
-                                                className="creator-input pr-14"
-                                            />
-                                            <button
-                                                onClick={() => setShowGemini(!showGemini)}
-                                                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white/20 hover:text-white/60 transition-colors"
-                                            >
-                                                {showGemini ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                            </button>
-                                        </div>
-                                        <p className="text-[10px] text-white/20 font-medium italic mt-3 px-1">Get your key from the <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">Google AI Studio</a>.</p>
+                                    <div>
+                                        <h4 className="font-bold text-white text-[15px] tracking-wide">Google Gemini API</h4> <p className="text-[10px] text-purple-400/60 uppercase tracking-widest font-black">Reasoning & Captioning Engine</p>
                                     </div>
                                 </div>
 
-                                {/* Fal.ai */}
-                                <div className="space-y-10">
-                                    <div className="flex items-center gap-4 border-b border-white/5 pb-5">
-                                        <div className="p-2.5 bg-orange-500/10 rounded-xl border border-orange-500/20">
-                                            <Key className="w-5 h-5 text-orange-400" />
-                                        </div>
-                                        <div>
-                                            <h4 className="font-bold text-white text-[15px] tracking-wide">Fal.ai API</h4>
-                                            <p className="text-[10px] text-orange-400/60 uppercase tracking-widest font-black">High-Fidelity Media Core</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="creator-field">
-                                        <div className="relative group">
-                                            <input
-                                                type={showFal ? "text" : "password"}
-                                                value={localKeys.fal}
-                                                onChange={e => setLocalKeys({ ...localKeys, fal: e.target.value })}
-                                                placeholder="Enter your Fal.ai Secret Key..."
-                                                className="creator-input pr-14"
-                                            />
-                                            <button
-                                                onClick={() => setShowFal(!showFal)}
-                                                className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white/20 hover:text-white/60 transition-colors"
-                                            >
-                                                {showFal ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                            </button>
-                                        </div>
-                                        <p className="text-[10px] text-white/20 font-medium italic mt-3 px-1">Manage keys in your <a href="https://fal.ai/dashboard/keys" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 transition-colors">Fal Dashboard</a>.</p>
-                                    </div>
-                                </div>
-
-                                <div className="mt-16">
+                                <div className="relative group">
+                                    <input
+                                        type={showGemini ? "text" : "password"}
+                                        value={localKeys.gemini}
+                                        onChange={e => setLocalKeys({ ...localKeys, gemini: e.target.value })}
+                                        placeholder="Enter your Gemini Pro Key..."
+                                        className="creator-input pr-14"
+                                    />
                                     <button
-                                        onClick={() => {
-                                            onUpdateApiKeys(localKeys);
-                                            const msg = "API Credentials updated successfully. Your keys are stored in private local storage.";
-                                            alert(msg);
-                                        }}
-                                        className="creator-btn-primary !py-5 shadow-2xl shadow-emerald-500/10"
+                                        onClick={() => setShowGemini(!showGemini)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white/40 hover:text-white transition-colors"
                                     >
-                                        <Key className="w-4 h-4" /> Commit API Credentials
+                                        {showGemini ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                     </button>
                                 </div>
+                                <p className="text-[10px] text-white/30 font-medium italic mt-2 px-1">Get your key from the <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition-colors">Google AI Studio</a>.</p>
+                            </div>
 
-                                <div className="bg-white/[0.03] border border-white/5 rounded-3xl p-8 space-y-4 mt-12">
-                                    <div className="flex items-center gap-2">
-                                        <Settings className="w-3.5 h-3.5 text-white/40" />
-                                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Security & Data Persistence</span>
+                            <div className="creator-section-divider" style={{ margin: '24px 0' }} />
+
+                            {/* Fal.ai */}
+                            <div className="creator-field">
+                                <div className="flex items-center border-b border-white/5" style={{ marginBottom: "24px", paddingBottom: "24px", gap: "20px" }}>
+                                    <div className="bg-orange-500/10 rounded-xl border border-orange-500/20 flex-shrink-0" style={{ padding: "12px" }}>
+                                        <Key className="w-5 h-5 text-orange-400" />
                                     </div>
-                                    <p className="text-[11px] text-white/30 leading-relaxed font-medium">
-                                        Your API credentials utilize **Hybrid Persistence**. They are currently saved in your browser's private IndexedDB instance. Login is required for encrypted cross-device synchronization and cloud backup.
-                                    </p>
+                                    <div>
+                                        <h4 className="font-bold text-white text-[15px] tracking-wide">Fal.ai API</h4> <p className="text-[10px] text-orange-400/60 uppercase tracking-widest font-black">High-Fidelity Media Core</p>
+                                    </div>
                                 </div>
+
+                                <div className="relative group">
+                                    <input
+                                        type={showFal ? "text" : "password"}
+                                        value={localKeys.fal}
+                                        onChange={e => setLocalKeys({ ...localKeys, fal: e.target.value })}
+                                        placeholder="Enter your Fal.ai Secret Key..."
+                                        className="creator-input pr-14"
+                                    />
+                                    <button
+                                        onClick={() => setShowFal(!showFal)}
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 text-white/40 hover:text-white transition-colors"
+                                    >
+                                        {showFal ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                                <p className="text-[10px] text-white/30 font-medium italic mt-2 px-1">Manage keys in your <a href="https://fal.ai/dashboard/keys" target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300 transition-colors">Fal Dashboard</a>.</p>
+                            </div>
+
+                            <div className="creator-field " style={{ marginTop: "24px" }}>
+                                <button
+                                    onClick={() => {
+                                        onUpdateApiKeys(localKeys);
+                                        const msg = "API Credentials updated successfully. Your keys are stored in private local storage.";
+                                        alert(msg);
+                                    }}
+                                    className="creator-btn-primary w-auto pl-5 pr-6 justify-center shadow-lg shadow-emerald-500/10"
+                                >
+                                    <Key className="w-4 h-4" /> Commit API Credentials
+                                </button>
+                            </div>
+
+                            <div className="bg-white/[0.03] border border-white/5 rounded-2xl" style={{ padding: '24px', marginTop: '32px' }}> <div className="flex items-center  mb-3" style={{ gap: "8px" }}>
+                                    <Settings className="w-3.5 h-3.5 text-white/40" /> <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Security & Data Persistence</span>
+                                </div>
+                                <p className="text-[11px] text-white/30 leading-relaxed font-medium">
+                                    Your API credentials utilize **Hybrid Persistence**. They are currently saved in your browser's private IndexedDB instance. Login is required for encrypted cross-device synchronization and cloud backup.
+                                </p>
                             </div>
                         </div>
                     )}

@@ -129,6 +129,8 @@ function AppHeader() {
     setExporting(false);
   };
 
+  const isCreatorTab = CREATOR_TABS.includes(state.sidebarTab);
+
   return (
     <header className="app-header">
       <div className="header-left">
@@ -154,23 +156,29 @@ function AppHeader() {
       </div>
 
       <div className="header-center">
-        <button className="header-icon-btn" onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)">
-          <Undo2 size={18} />
-        </button>
-        <button className="header-icon-btn" onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Y)">
-          <Redo2 size={18} />
-        </button>
+        {!isCreatorTab && (
+          <>
+            <button className="header-icon-btn" onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)">
+              <Undo2 size={18} />
+            </button>
+            <button className="header-icon-btn" onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Y)">
+              <Redo2 size={18} />
+            </button>
+          </>
+        )}
       </div>
 
       <div className="header-right">
-        <button
-          className="btn-primary"
-          onClick={handleExport}
-          disabled={exporting}
-        >
-          {exporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-          {exporting ? 'Exporting...' : 'Export'}
-        </button>
+        {!isCreatorTab && (
+          <button
+            className="btn-primary"
+            onClick={handleExport}
+            disabled={exporting}
+          >
+            {exporting ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
+            {exporting ? 'Exporting...' : 'Export'}
+          </button>
+        )}
       </div>
     </header>
   );
