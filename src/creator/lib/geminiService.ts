@@ -3,22 +3,22 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 const apiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
 
 let genAI = new GoogleGenerativeAI(apiKey);
+let currentGeminiApiKey: string = apiKey;
 
 export const updateGeminiApiKey = (newKey: string) => {
+    currentGeminiApiKey = newKey;
     genAI = new GoogleGenerativeAI(newKey);
 };
 
 export const SIMPLE_SYSTEM_INSTRUCTION = `
-You are Character Video Creator, an advanced AI designed to generate engaging, viral-ready influencer scripts.
+You are a video narration scriptwriter. Your job is to write spoken-word narration scripts for short-form videos.
 
-**Your Prime Directive:**
-Create compelling video concepts and scripts that feel authentic, relatable, and highly engaging for platforms like TikTok, Instagram Reels, and YouTube Shorts.
-
-**Voice & Style Rules:**
-1.  **Format:** ALWAYS write in a conversational, spoken-word format. Use short paragraphs. Include stage directions in brackets like [points to text], [camera zooms in].
-2.  **Hooks:** Always start with a strong, scroll-stopping hook within the first 3 seconds.
-3.  **Tone:** Authentic, energetic, and tailored to the specific theme (e.g., educational, storytelling, casual vlog).
-4.  **Structure:** Hook -> Context/Story -> Value/Punchline -> Call to Action (CTA).
+**Rules:**
+1. Write ONLY the spoken narration text — no hashtags, no emojis, no social media captions.
+2. Format for spoken delivery: short sentences, natural pauses, conversational rhythm.
+3. Optional stage directions in brackets like [pause] or [slow down] are acceptable.
+4. Keep scripts concise and appropriate for a 30–90 second video.
+5. Tailor tone and structure to the requested style.
 `;
 
 export interface AnalysisResult {
@@ -35,6 +35,7 @@ export interface GenerationRequest {
     sourceImage?: string;
     image_urls?: string[];
     contentParts?: any[];
+    signal?: AbortSignal;
     videoConfig?: {
         durationSeconds: string;
         resolution: string;
@@ -91,7 +92,7 @@ Output ONLY valid JSON with keys: "technical_prompt" and "reasoning".`;
         if (request.type === 'image' || request.type === 'edit') {
             const modelId = request.model || "gemini-3-pro-image-preview";
             try {
-                const currentKey = import.meta.env.VITE_GEMINI_API_KEY;
+                const currentKey = currentGeminiApiKey;
                 if (!currentKey) throw new Error("API Key is missing");
                 const { GoogleGenAI, HarmCategory, HarmBlockThreshold } = await import("@google/genai");
                 const ai = new GoogleGenAI({ apiKey: currentKey });
@@ -153,16 +154,13 @@ Output ONLY valid JSON with keys: "technical_prompt" and "reasoning".`;
         } else {
             const modelId = request.model || "veo-3.1-generate-preview";
             try {
-                const currentKey = import.meta.env.VITE_GEMINI_API_KEY;
+                const currentKey = currentGeminiApiKey;
+                if (!currentKey) throw new Error("Gemini API Key is missing. Add it in Settings.");
                 const { GoogleGenAI } = await import("@google/genai");
                 const ai = new GoogleGenAI({ apiKey: currentKey });
 
-                let veoAspectRatio = "9:16";
-                if (request.aspectRatio === "16:9") veoAspectRatio = "16:9";
-                else if (request.aspectRatio) {
-                    const [w, h] = request.aspectRatio.split(':').map(Number);
-                    if (w > h) veoAspectRatio = "16:9";
-                }
+                // Veo only supports "16:9" (default) and "9:16"
+                const veoAspectRatio = request.aspectRatio === "9:16" ? "9:16" : "16:9";
 
                 let duration = request.videoConfig?.durationSeconds ? parseInt(request.videoConfig.durationSeconds) : 5;
                 const resolution = request.videoConfig?.resolution || "1080p";
@@ -174,7 +172,7 @@ Output ONLY valid JSON with keys: "technical_prompt" and "reasoning".`;
                 const payload: any = {
                     model: modelId,
                     prompt: request.prompt,
-                    config: { numberOfVideos: 1, resolution, durationSeconds: duration, aspectRatio: veoAspectRatio, personGeneration: "allow_adult" }
+                    config: { numberOfVideos: 1, durationSeconds: duration, aspectRatio: veoAspectRatio, personGeneration: "allow_adult" }
                 };
 
                 if (request.contentParts && request.contentParts.length > 0) {
@@ -185,17 +183,26 @@ Output ONLY valid JSON with keys: "technical_prompt" and "reasoning".`;
                 }
 
                 let operation = await ai.models.generateVideos(payload);
+                let pollAttempts = 0;
+                const maxPolls = 72; // 72 × 10s = 12 minutes max
                 while (!operation.done) {
+                    if (request.signal?.aborted) throw new Error("Generation cancelled.");
+                    if (pollAttempts >= maxPolls) throw new Error("Video generation timed out after 12 minutes.");
                     await new Promise((resolve) => setTimeout(resolve, 10000));
-                    // @ts-ignore — getVideosOperation is valid at runtime
-                    try { operation = await ai.operations.getVideosOperation({ operation }); } catch { /* retry */ }
+                    pollAttempts++;
+                    if (request.signal?.aborted) throw new Error("Generation cancelled.");
+                    try { operation = await ai.operations.get({ operation }); } catch (pollErr: any) {
+                        // Allow a couple transient failures, then surface the error
+                        if (pollAttempts > 3) throw new Error(`Polling failed: ${pollErr?.message || pollErr}`);
+                    }
                 }
 
                 if (operation.error) throw new Error(`Veo Error: ${operation.error.message}`);
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const opResponse = (operation.response as any);
-                if (opResponse?.generatedVideos?.length > 0) {
-                    const videoUri = opResponse.generatedVideos[0].video?.uri;
+                // SDK varies between versions: try both .result and .response
+                const opResult = operation.result ?? (operation as any).response;
+                const generatedVideos = opResult?.generatedVideos;
+                if (generatedVideos?.length > 0) {
+                    const videoUri = generatedVideos[0].video?.uri;
                     if (!videoUri) throw new Error("Video URI missing");
                     const res = await fetch(`${videoUri}&key=${currentKey}`);
                     if (!res.ok) throw new Error(`Failed to fetch video: ${res.status}`);
@@ -205,7 +212,17 @@ Output ONLY valid JSON with keys: "technical_prompt" and "reasoning".`;
                     for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
                     return [`data:video/mp4;base64,${btoa(binary)}`];
                 }
-                throw new Error("Video generation completed but no data produced.");
+                // Check for RAI (Responsible AI) content filtering reasons
+                const raiReasons: string[] = opResult?.raiMediaFilteredReasons ?? [];
+                const raiCount: number = opResult?.raiMediaFilteredCount ?? 0;
+                if (raiReasons.length > 0) {
+                    throw new Error(`Content blocked by Veo safety policy: ${raiReasons.join(', ')}`);
+                }
+                if (raiCount > 0) {
+                    throw new Error(`Content blocked by Veo safety policy (${raiCount} video(s) filtered). Try rephrasing your prompt.`);
+                }
+                console.error('Veo operation result:', JSON.stringify(operation, null, 2));
+                throw new Error(`Video generation completed but returned no data. Result: ${JSON.stringify(opResult)?.slice(0, 300)}`);
             } catch (e: any) {
                 throw new Error(`Video Generation Failed: ${e.message || e}`);
             }

@@ -1,9 +1,13 @@
-import { Film, Music, Search, Trash2, UploadCloud } from 'lucide-react';
+import { Film, Music, Search, Trash2, UploadCloud, X } from 'lucide-react';
 import React, { useState } from 'react';
 import { useTimelineContext } from '../lib/TimelineContext';
 import { MediaItem } from '../lib/types';
 
 function getMediaUrl(filePath: string): string {
+  // Data URIs, blob URLs, and http(s) URLs don't need Electron path resolution
+  if (filePath.startsWith('data:') || filePath.startsWith('blob:') || filePath.startsWith('http')) {
+    return filePath;
+  }
   if (window.electronAPI?.getFileUrl) {
     return window.electronAPI.getFileUrl(filePath);
   }
@@ -36,6 +40,7 @@ function MediaThumbnail({ item }: { item: MediaItem }) {
 const MediaBin: React.FC = () => {
   const { state, addMediaToLibrary, removeMedia } = useTimelineContext();
   const [search, setSearch] = useState('');
+  const [previewItem, setPreviewItem] = useState<MediaItem | null>(null);
 
   const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
@@ -130,9 +135,11 @@ const MediaBin: React.FC = () => {
       {/* Media list */}
       <div className="media-items">
         {filteredItems.map(item => (
-          <div key={item.id} className="media-item" draggable onDragStart={(e) => {
-            e.dataTransfer.setData('source-media-id', item.id);
-          }}>
+          <div key={item.id} className="media-item" draggable
+            onDoubleClick={() => setPreviewItem(item)}
+            onDragStart={(e) => {
+              e.dataTransfer.setData('source-media-id', item.id);
+            }}>
             <MediaThumbnail item={item} />
             <div className="media-item-details">
               <span className="media-item-name" title={item.name}>{cleanName(item.name)}</span>
@@ -153,6 +160,36 @@ const MediaBin: React.FC = () => {
           <div className="media-empty">No results for "{search}"</div>
         )}
       </div>
+
+      {/* Fullscreen Preview Modal */}
+      {previewItem && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 9000, background: 'rgba(0,0,0,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setPreviewItem(null); }}
+        >
+          <button
+            type="button"
+            style={{ position: 'fixed', top: '1.5rem', right: '1.5rem', zIndex: 9001, padding: '12px', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50%', color: 'rgba(255,255,255,0.7)', cursor: 'pointer', display: 'flex' }}
+            onClick={() => setPreviewItem(null)}
+          >
+            <X size={20} />
+          </button>
+          {previewItem.type === 'video' ? (
+            <video
+              src={getMediaUrl(previewItem.path)}
+              controls
+              autoPlay
+              style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: '12px', boxShadow: '0 25px 50px rgba(0,0,0,0.5)' }}
+            />
+          ) : previewItem.type === 'image' ? (
+            <img
+              src={getMediaUrl(previewItem.path)}
+              alt={previewItem.name}
+              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '12px', boxShadow: '0 25px 50px rgba(0,0,0,0.5)' }}
+            />
+          ) : null}
+        </div>
+      )}
     </div>
   );
 };

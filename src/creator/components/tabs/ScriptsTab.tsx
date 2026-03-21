@@ -1,5 +1,5 @@
 import React from 'react';
-import { Loader2, Wand2, AlignLeft, Copy, Save, X } from 'lucide-react';
+import { Loader2, Wand2, AlignLeft, Copy, Save, Video } from 'lucide-react';
 import { CustomSelect } from '../CustomSelect';
 
 
@@ -13,10 +13,14 @@ export interface ScriptsTabProps {
     captionStyles: { id: string; label: string; prompt: string }[];
     onGenerateCaptionOnly: () => void;
     isGeneratingCaption: boolean;
+    videoDuration: string;
+    setVideoDuration: (val: string) => void;
     onSave?: () => void;
     onExit?: () => void;
     onNavigateTo?: (tab: string) => void;
     apiKeys: { gemini: string; fal: string };
+    onSendToAnimate?: () => void;
+    presetsDropdown?: React.ReactNode;
 }
 
 export function ScriptsTab({
@@ -29,10 +33,14 @@ export function ScriptsTab({
     captionStyles,
     onGenerateCaptionOnly,
     isGeneratingCaption,
+    videoDuration,
+    setVideoDuration,
     onSave,
     onExit,
     onNavigateTo,
-    apiKeys
+    apiKeys,
+    onSendToAnimate,
+    presetsDropdown
 }: ScriptsTabProps) {
     return (
         <div className="flex h-full w-full pointer-events-auto">
@@ -73,6 +81,19 @@ export function ScriptsTab({
                             options={captionStyles.map(t => ({ value: t.id, label: t.label }))}
                         />
                     </div>
+
+                    <div className="creator-field">
+                        <label className="creator-label">Video Length</label>
+                        <CustomSelect
+                            value={videoDuration}
+                            onChange={setVideoDuration}
+                            options={[
+                                { value: '4s', label: '4 sec (~35 words)' },
+                                { value: '6s', label: '6 sec (~60 words)' },
+                                { value: '8s', label: '8 sec (~90 words)' },
+                            ]}
+                        />
+                    </div>
                 </div>
 
                 {/* Left Action Bottom */}
@@ -107,6 +128,7 @@ export function ScriptsTab({
                             </div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {presetsDropdown}
                             <button
                                 onClick={() => { navigator.clipboard.writeText(generatedCaption); alert('Copied to clipboard!'); }}
                                 className="creator-result-action"
@@ -120,6 +142,14 @@ export function ScriptsTab({
                                     style={{ padding: '6px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
                                 >
                                     <Save style={{ width: 13, height: 13 }} /> Save
+                                </button>
+                            )}
+                            {onSendToAnimate && generatedCaption && (
+                                <button
+                                    onClick={onSendToAnimate}
+                                    style={{ padding: '6px 14px', background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)', borderRadius: '8px', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgb(52,211,153)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}
+                                >
+                                    <Video style={{ width: 13, height: 13 }} /> Send to Animate
                                 </button>
                             )}
                         </div>

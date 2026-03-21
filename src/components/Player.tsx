@@ -5,6 +5,10 @@ import { Clip, Track, TransitionType } from '../lib/types';
 import SubtitleOverlay from './SubtitleOverlay';
 
 function getMediaUrl(filePath: string): string {
+  // data: and blob: URIs are already loadable — don't wrap in media:// protocol
+  if (filePath.startsWith('data:') || filePath.startsWith('blob:') || filePath.startsWith('http')) {
+    return filePath;
+  }
   if (window.electronAPI?.getFileUrl) {
     return window.electronAPI.getFileUrl(filePath);
   }

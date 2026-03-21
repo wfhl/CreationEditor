@@ -54,28 +54,28 @@ export const SIMPLE_THEMES = [
 
 export const CAPTION_TEMPLATES = [
     {
-        id: "viral-hook",
-        label: "Viral Hook / Storytime",
-        prompt: "Write an engaging Instagram Reel/TikTok caption for the topic. Start with a scroll-stopping hook (e.g., 'You won't believe this...'). Keep paragraphs short. Add related emojis. End with a question to drive comments."
+        id: "cinematic-narration",
+        label: "Cinematic / Atmospheric",
+        prompt: "Write the character's spoken words in a cinematic, atmospheric style. Use vivid, evocative language. First-person voice, speaking directly to camera. Short, punchy sentences with weight. Output only the raw spoken dialogue."
+    },
+    {
+        id: "direct-hook",
+        label: "Direct Hook / Personal",
+        prompt: "Write the character's spoken words starting with a compelling hook that grabs attention in the first sentence. First-person, authentic, personal tone. Structure: hook → story → insight. Output only the raw spoken dialogue."
     },
     {
         id: "educational",
-        label: "Educational / 'Did You Know?'",
-        prompt: "Write a fascinating educational caption. Open with a surprising fact or question about the topic. Break down the information in an easy-to-read way. End with 'Save this for later!'."
-    },
-    {
-        id: "vlog-casual",
-        label: "Casual Vlog / GRWM",
-        prompt: "Write a relatable, casual caption like you are talking to a best friend. Mention your outfit or mood. Keep it light, authentic, and engaging. Include a relevant emoji aesthetic."
-    },
-    {
-        id: "review-promo",
-        label: "Review / Product Feature",
-        prompt: "Write a structured review caption. Start with a strong opinion on the topic. List 2-3 key benefits or honest thoughts. End with a call to action (e.g., 'Link in bio' or 'Have you tried this?')."
+        label: "Educational / Explainer",
+        prompt: "Write the character's spoken words in a clear, engaging teaching style. Open with a surprising fact or question. Break down the topic in plain conversational language, first-person. Output only the raw spoken dialogue."
     },
     {
         id: "motivational",
-        label: "Motivational Rant",
-        prompt: "Write a high-energy, motivational caption. Address the reader directly with 'Listen to me...'. Use short, punchy sentences. Deliver a strong takeaway about the topic."
+        label: "Motivational Monologue",
+        prompt: "Write the character's spoken words in a high-energy motivational style. First-person, speaking directly to the viewer. Short punchy declarative sentences, building to a strong closing line. Output only the raw spoken dialogue."
+    },
+    {
+        id: "reflective",
+        label: "Reflective / Poetic",
+        prompt: "Write the character's spoken words in an introspective, poetic style. Lyrical and evocative, slow rhythm. First-person voice, focused on atmosphere and feeling. Output only the raw spoken dialogue."
     }
 ];

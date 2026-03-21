@@ -15,6 +15,7 @@ export interface FalGenerationRequest {
     video_url?: string;
     image_urls?: string[];
     contentParts?: any[];
+    signal?: AbortSignal;
     videoConfig?: { durationSeconds: string; resolution: string; withAudio: boolean; cameraFixed?: boolean; };
     editConfig?: { imageSize?: string; numImages?: number; enableSafety?: boolean; enhancePromptMode?: "standard" | "fast"; };
     loras?: Array<{ path: string; scale?: number }>;
@@ -99,6 +100,7 @@ export const falService = {
             const result: any = await fal.subscribe(endpoint, {
                 input,
                 logs: true,
+                signal: request.signal,
                 onQueueUpdate: (update: any) => {
                     if (request.onEnqueue && update.request_id && !enqueuedCalled) {
                         enqueuedCalled = true;

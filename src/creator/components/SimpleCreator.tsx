@@ -95,9 +95,12 @@ export default function SimpleCreator({ externalTab, onSendToEditor, onNavigateT
 
     const [i2vTarget, setI2VTarget] = useState<{ url: string, index: number } | null>(null);
     const [i2vPrompt, setI2VPrompt] = useState("");
+    const [i2vScript, setI2VScript] = useState("");
     const [activeAnimations, setActiveAnimations] = useState(0);
     const isGeneratingI2V = activeAnimations > 0;
     const [i2vResultUrl, setI2VResultUrl] = useState<string | null>(null);
+    const cancelI2VRef = useRef<AbortController | null>(null);
+    const cancelCreateRef = useRef<AbortController | null>(null);
 
     // Control State
     const [selectedModel, setSelectedModel] = useState<string>('gemini-3-pro-image-preview');
@@ -117,7 +120,7 @@ export default function SimpleCreator({ externalTab, onSendToEditor, onNavigateT
     // Video Configuration
     const [videoResolution, setVideoResolution] = useState<string>('1080p');
     const [videoDuration, setVideoDuration] = useState<string>('6s');
-    const [i2vAspectRatio, setI2vAspectRatio] = useState<string>('9:16');
+    const [i2vAspectRatio, setI2vAspectRatio] = useState<string>('auto');
     const [withAudio, setWithAudio] = useState(true);
     const [cameraFixed, setCameraFixed] = useState(false);
 
@@ -530,6 +533,8 @@ export default function SimpleCreator({ externalTab, onSendToEditor, onNavigateT
     const handleGenerateMedia = async (promptOverride?: string) => {
         const finalPromptToUse = promptOverride || generatedPrompt;
         if (!finalPromptToUse) return;
+        const abortController = new AbortController();
+        cancelCreateRef.current = abortController;
         setActiveMediaGenerations(prev => prev + 1);
         setGeneratedMediaUrls([]);
 
@@ -634,6 +639,7 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
                     prompt: finalPrompt,
                     aspectRatio: mediaType === 'video' ? i2vAspectRatio : aspectRatio,
                     contentParts: contentParts,
+                    signal: abortController.signal,
                     videoConfig: mediaType === 'video' ? {
                         resolution: videoResolution,
                         durationSeconds: videoDuration.replace('s', ''),
@@ -676,6 +682,7 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
                     model: selectedModel,
                     aspectRatio: mediaType === 'video' ? i2vAspectRatio : aspectRatio,
                     contentParts: contentParts,
+                    signal: abortController.signal,
                     videoConfig: mediaType === 'video' ? {
                         resolution: videoResolution,
                         durationSeconds: videoDuration.replace('s', ''),
@@ -720,6 +727,7 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
             generationError = error?.message || 'Unknown error';
             alert("Media generation failed.");
         } finally {
+            cancelCreateRef.current = null;
             setActiveMediaGenerations(prev => Math.max(0, prev - 1));
 
             // --- Save to Generation History ---
@@ -755,17 +763,25 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
         setIsGeneratingCaption(true);
         try {
             const template = captionStyles.find(c => c.id === (overrides?.captionType || captionType));
+            const durSecs = parseInt((overrides?.videoDuration || videoDuration).replace('s', '')) || 6;
+            const wordTarget = durSecs <= 4 ? '30–40' : durSecs <= 6 ? '50–70' : '80–110';
             const systemInstruction = `
-            You are the Character Video Creator.
-            CORE PERSONA: ${profile.subject}
+            You are a scriptwriter for short animated video clips where the character speaks ON CAMERA with lip-sync audio.
+            CHARACTER: ${profile.subject}
             CONTEXT: Theme: ${(overrides?.theme || currentTheme).name}, Visuals: ${overrides?.visuals || specificVisuals}, Outfit: ${overrides?.outfit || specificOutfit}
-            TASK: Write a caption for Topic: "${t}". Style: ${template?.prompt}
+            TASK: Write the EXACT WORDS the character says out loud on screen, for Topic: "${t}". Style: ${template?.prompt}
+            LENGTH: The video is ${durSecs} seconds long. Target ${wordTarget} words — no more, no less.
+            RULES:
+            - Write ONLY the words the character speaks out loud — this is their actual on-screen dialogue
+            - ALWAYS use first-person ("I", "we", "you") — the character is talking directly to the camera
+            - NO third-person narration, NO stage directions, NO hashtags, NO emojis
+            - Output the raw spoken words only — nothing else
             `;
             const result = await geminiService.generateText(`TOPIC: "${t}"`, systemInstruction);
             setGeneratedCaption(result);
         } catch (e) {
             console.error(e);
-            setGeneratedCaption("Error generating caption.");
+            setGeneratedCaption("Error generating script.");
         } finally {
             setIsGeneratingCaption(false);
         }
@@ -848,6 +864,9 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
         } else if (activeTab === 'animate') {
             promptToSave = i2vPrompt;
             description = `Animation: ${i2vPrompt.slice(0, 30)}...`;
+        } else if (activeTab === 'scripts') {
+            promptToSave = generatedCaption;
+            description = topic ? `Script: ${topic}` : `Script: ${generatedCaption.slice(0, 30)}...`;
         }
 
         let name = nameOverride;
@@ -934,6 +953,9 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
             if (preset.aspectRatio && preset.aspectRatio !== 'auto') {
                 setI2vAspectRatio(preset.aspectRatio);
             }
+        } else if (activeTab === 'scripts') {
+            if (preset.basePrompt) setGeneratedCaption(preset.basePrompt);
+            if (preset.themeId) setSelectedThemeId(preset.themeId);
         }
         setIsPresetsOpen(false);
     };
@@ -1155,7 +1177,13 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
             await dbService.saveAsset(newAsset);
             // Do NOT update setAssets(prev => [...]) here.
             // Generative results saved to the library should not become prompt references.
-            alert("Saved to Asset Library!");
+
+            // Also add to Your Media (MediaBin) via the editor callback
+            if (onSendToEditor) {
+                onSendToEditor([base64]);
+            }
+
+            alert("Saved to Your Media!");
         } catch (err) {
             console.error("Save to assets failed:", err);
             alert("Failed to save asset.");
@@ -1434,6 +1462,8 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
                         }}
                         apiKeys={apiKeys}
                         onExit={() => onNavigateTo?.('media')}
+                        onClearResults={() => setGeneratedMediaUrls([])}
+                        onCancelCreate={() => { cancelCreateRef.current?.abort(); cancelCreateRef.current = null; }}
                     />
 
                 </>)}
@@ -1667,6 +1697,8 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
                         setI2VTarget={setI2VTarget}
                         i2vPrompt={i2vPrompt}
                         setI2VPrompt={setI2VPrompt}
+                        i2vScript={i2vScript}
+                        setI2VScript={setI2VScript}
                         i2vAspectRatio={i2vAspectRatio}
                         setI2VAspectRatio={(val) => { setI2vAspectRatio(val); persistParam('i2vAspectRatio', val); }}
                         videoDuration={videoDuration}
@@ -1692,16 +1724,44 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
                             }
                         }}
 
+                        onCancelI2V={() => {
+                            if (cancelI2VRef.current) {
+                                cancelI2VRef.current.abort();
+                                cancelI2VRef.current = null;
+                            }
+                            setActiveAnimations(0);
+                        }}
+
                         onGenerateI2V={async () => {
-                            if (!i2vTarget || !i2vPrompt) return;
+                            if (!i2vTarget || (!i2vPrompt && !i2vScript)) return;
+                            const abortController = new AbortController();
+                            cancelI2VRef.current = abortController;
                             setActiveAnimations(prev => prev + 1);
+
+                            // Resolve "auto" aspect ratio by detecting actual image dimensions
+                            let effectiveAspectRatio = i2vAspectRatio;
+                            if (i2vAspectRatio === 'auto') {
+                                effectiveAspectRatio = await new Promise<string>((resolve) => {
+                                    const img = new Image();
+                                    img.onload = () => resolve(img.width >= img.height ? '16:9' : '9:16');
+                                    img.onerror = () => resolve('16:9');
+                                    img.src = i2vTarget.url;
+                                });
+                            }
+
+                            // Veo dialogue format per API docs: Character: "spoken words"
+                            const combinedPrompt = i2vScript
+                                ? i2vPrompt
+                                    ? `${i2vPrompt}. Character: "${i2vScript}"`
+                                    : `The character in the image looks directly at the camera. Character: "${i2vScript}"`
+                                : i2vPrompt;
 
                             const historyId = generateUUID();
                             const baseHistoryEntry: DBGenerationHistory = {
                                 id: historyId,
                                 timestamp: Date.now(),
                                 type: 'video',
-                                prompt: i2vPrompt,
+                                prompt: combinedPrompt,
                                 model: selectedModel,
                                 mediaUrls: [],
                                 service: (selectedModel.includes('grok') || selectedModel.includes('seedance') || selectedModel.includes('wan')) ? 'fal' : 'gemini',
@@ -1738,10 +1798,11 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
                                     // Fal Service
                                     const req: FalGenerationRequest = {
                                         model: selectedModel,
-                                        prompt: i2vPrompt,
-                                        aspectRatio: i2vAspectRatio,
+                                        prompt: combinedPrompt,
+                                        aspectRatio: effectiveAspectRatio,
                                         contentParts,
                                         loras,
+                                        signal: abortController.signal,
                                         videoConfig: {
                                             resolution: videoResolution,
                                             durationSeconds: videoDuration.replace('s', ''),
@@ -1763,9 +1824,10 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
                                     // Gemini / Veo Service
                                     const req: GenerationRequest = {
                                         type: 'video',
-                                        prompt: i2vPrompt,
+                                        prompt: combinedPrompt,
                                         model: selectedModel,
-                                        aspectRatio: i2vAspectRatio,
+                                        aspectRatio: effectiveAspectRatio,
+                                        signal: abortController.signal,
                                         videoConfig: {
                                             resolution: videoResolution,
                                             durationSeconds: videoDuration.replace('s', ''),
@@ -1798,7 +1860,10 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
                                         errorMessage: e?.message || 'Unknown error'
                                     });
                                 } catch (err) { }
-                            } finally { setActiveAnimations(prev => Math.max(0, prev - 1)); }
+                            } finally {
+                                cancelI2VRef.current = null;
+                                setActiveAnimations(prev => Math.max(0, prev - 1));
+                            }
                         }}
                         generatedI2VUrl={i2vResultUrl}
                         onExit={() => onNavigateTo?.('creator-create')}
@@ -1851,13 +1916,34 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
                             captionStyles={captionStyles}
                             onGenerateCaptionOnly={handleGenerateCaption}
                             isGeneratingCaption={isGeneratingCaption}
-                            onSave={() => setShowSaveForm(true)}
+                            videoDuration={videoDuration}
+                            setVideoDuration={(val) => { setVideoDuration(val); persistParam('videoDuration', val); }}
+                            onSave={() => { setIsPresetsOpen(true); setShowSaveForm(true); }}
                             onExit={() => onNavigateTo?.('create')}
                             apiKeys={apiKeys}
                             onNavigateTo={(tab) => {
                                 if (tab === 'media') onNavigateTo?.('media');
                                 else setActiveTab(tab as any);
                             }}
+                            onSendToAnimate={() => {
+                                setI2VScript(generatedCaption);
+                                setActiveTab('animate');
+                            }}
+                            presetsDropdown={
+                                <PresetsDropdown
+                                    isOpen={isPresetsOpen}
+                                    setIsOpen={setIsPresetsOpen}
+                                    showSaveForm={showSaveForm}
+                                    setShowSaveForm={setShowSaveForm}
+                                    currentPostData={{}}
+                                    onSavePost={handleSavePreset}
+                                    onLoadPreset={handleLoadPreset}
+                                    presetsList={presets}
+                                    onDeletePreset={handleDeletePreset}
+                                    direction="down"
+                                    tab="scripts"
+                                />
+                            }
                         />
                         {/* Next-step banner */}
                     </>
@@ -1897,12 +1983,14 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
             {previewContext && previewUrl && (
                 <div
                     className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-2 md:p-12 animate-in fade-in duration-300"
-                    onClick={() => setPreviewContext(null)}
+                    onClick={(e) => { if (e.target === e.currentTarget) setPreviewContext(null); }}
                 >
                     {/* Close Button */}
                     <button
-                        className="absolute top-10 right-6 md:top-6 md:right-6 p-4 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full text-white/60 hover:text-white transition-all border border-white/10 z-[1001]"
-                        onClick={() => setPreviewContext(null)}
+                        type="button"
+                        className="absolute top-10 right-6 md:top-6 md:right-6 p-4 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full text-white/60 hover:text-white transition-all border border-white/10"
+                        style={{ zIndex: 9999 }}
+                        onClick={(e) => { e.stopPropagation(); setPreviewContext(null); }}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
                     </button>

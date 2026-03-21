@@ -196,20 +196,31 @@ function AppContent() {
     : null;
   const hasTransitionSelection = !!state.selectedTransitionClipId;
 
+  const getVideoDuration = (url: string): Promise<number> =>
+    new Promise((resolve) => {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.onloadedmetadata = () => resolve(isFinite(video.duration) ? video.duration : 6);
+        video.onerror = () => resolve(6);
+        video.src = url;
+    });
+
   const handleSendToEditor = (urls: string[]) => {
-    urls.forEach((url, index) => {
-        // Quick check if it's a video (data:video or known extension)
+    urls.forEach(async (url, index) => {
         const isUrlVideo = url.startsWith('data:video') || (() => {
             const clean = url.split('?')[0].split('#')[0].toLowerCase();
             return ['.mp4', '.mov', '.webm', '.m4v', '.ogv'].some(ext => clean.endsWith(ext));
         })();
 
+        const duration = isUrlVideo ? await getVideoDuration(url) : 0;
+        const mediaType = isUrlVideo ? 'Video' : 'Image';
+        const timestamp = new Date().toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         addMediaToLibrary({
             id: generateUUID(),
-            name: `Creator Media ${index + 1}`,
+            name: urls.length > 1 ? `${mediaType} ${index + 1} – ${timestamp}` : `${mediaType} – ${timestamp}`,
             type: isUrlVideo ? 'video' : 'image',
             path: url,
-            duration: isUrlVideo ? 6 : 0, // Default to 6s for videos if we don't know
+            duration,
         });
     });
   };
@@ -220,20 +231,20 @@ function AppContent() {
       <div className="app-body">
         <SidebarRail />
 
-        {isCreatorTab ? (
-          /* ─── Full-screen creator canvas ─── */
-          <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-            <SimpleCreator
-                externalTab={state.sidebarTab.replace('creator-', '') as any}
-                onSendToEditor={handleSendToEditor}
-                onNavigateTo={(tab) => {
-                  const target = tab.startsWith('creator-') ? tab : `creator-${tab}`;
-                  setSidebarTab(target as SidebarTab);
-                }}
-            />
-          </div>
-        ) : (
-          /* ─── Normal editor layout ─── */
+        {/* ─── Full-screen creator canvas ─── Always mounted to preserve state */}
+        <div style={{ flex: 1, overflow: 'hidden', position: 'relative', display: isCreatorTab ? 'flex' : 'none', flexDirection: 'column' }}>
+          <SimpleCreator
+              externalTab={state.sidebarTab.replace('creator-', '') as any}
+              onSendToEditor={handleSendToEditor}
+              onNavigateTo={(tab) => {
+                const target = tab.startsWith('creator-') ? tab : `creator-${tab}`;
+                setSidebarTab(target as SidebarTab);
+              }}
+          />
+        </div>
+
+        {/* ─── Normal editor layout ─── */}
+        {!isCreatorTab && (
           <>
             <SidebarPanel />
             <main className="app-main">

@@ -3,6 +3,10 @@ import { Clip, ClipTransition, MediaItem, ProjectState, SidebarTab, SubtitleItem
 
 /** Fetch a thumbnail from Electron's ffmpeg backend; returns '' if unavailable */
 function fetchThumbnail(filePath: string, timestamp: number): Promise<string> {
+  // data: URIs don't go through Electron — images are their own thumbnail, videos have no frame to extract
+  if (filePath.startsWith('data:') || filePath.startsWith('blob:')) {
+    return Promise.resolve(filePath.startsWith('data:image') ? filePath : '');
+  }
   if (!window.electronAPI?.getThumbnail) return Promise.resolve('');
   return window.electronAPI.getThumbnail(filePath, Math.max(0, timestamp)).catch(() => '');
 }

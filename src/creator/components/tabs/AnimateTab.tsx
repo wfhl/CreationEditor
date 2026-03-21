@@ -20,8 +20,11 @@ interface AnimateTabProps {
     setVideoResolution: (val: string) => void;
     selectedModel: string;
     setSelectedModel: (val: string) => void;
+    i2vScript: string;
+    setI2VScript: (val: string) => void;
     isGeneratingI2V: boolean;
     onGenerateI2V: () => void;
+    onCancelI2V: () => void;
     generatedI2VUrl: string | null;
     onExit: () => void;
 
@@ -59,8 +62,11 @@ export function AnimateTab({
     setVideoResolution,
     selectedModel,
     setSelectedModel,
+    i2vScript,
+    setI2VScript,
     isGeneratingI2V,
     onGenerateI2V,
+    onCancelI2V,
     generatedI2VUrl,
     onExit,
     onApproveI2V,
@@ -182,9 +188,9 @@ export function AnimateTab({
                                 value={videoResolution}
                                 onChange={setVideoResolution}
                                 options={[
-                                    { value: '1080p', label: '1080p' },
                                     { value: '720p', label: '720p' },
-                                    { value: '480p', label: '480p' },
+                                    { value: '1080p', label: '1080p (8s only)' },
+                                    { value: '4k', label: '4K (8s only)' },
                                 ]}
                             />
                         </div>
@@ -194,9 +200,9 @@ export function AnimateTab({
                                 value={videoDuration}
                                 onChange={setVideoDuration}
                                 options={[
-                                    { value: '5s', label: '5 Seconds' },
-                                    { value: '10s', label: '10 Seconds' },
-                                    { value: '15s', label: '15 Seconds' },
+                                    { value: '4s', label: '4 Seconds' },
+                                    { value: '6s', label: '6 Seconds' },
+                                    { value: '8s', label: '8 Seconds' },
                                 ]}
                             />
                         </div>
@@ -262,7 +268,7 @@ export function AnimateTab({
                         const needsFal = !!selectedModel.toLowerCase().match(/grok|seedance|wan|fal/i);
                         const missingFal = needsFal && !apiKeys.fal;
                         const missingGemini = !needsFal && !apiKeys.gemini;
-                        const isDisabled = isGeneratingI2V || !i2vTarget || !i2vPrompt || missingFal || missingGemini;
+                        const isDisabled = isGeneratingI2V || !i2vTarget || (!i2vPrompt && !i2vScript) || missingFal || missingGemini;
 
                         return (
                             <>
@@ -299,11 +305,11 @@ export function AnimateTab({
                         </div>
                     </div>
 
-                    {/* Motion Prompt */}
+                    {/* Motion & Visuals Prompt */}
                     <div className="creator-field">
                         <div className="creator-prompt-row">
                             <label className="creator-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <Play style={{ width: 12, height: 12, color: 'rgb(52,211,153)' }} /> Motion Prompt
+                                <Play style={{ width: 12, height: 12, color: 'rgb(52,211,153)' }} /> Motion & Visuals
                             </label>
                             {presetsDropdown}
                         </div>
@@ -311,9 +317,9 @@ export function AnimateTab({
                             ref={promptRef}
                             value={i2vPrompt}
                             onChange={(e) => setI2VPrompt(e.target.value)}
-                            placeholder="Describe motion... (e.g., 'Camera pans right, person smiles')"
+                            placeholder="Describe motion and visuals... (e.g., 'Camera pans right slowly, warm golden light')"
                             className="creator-textarea"
-                            style={{ minHeight: '96px' }}
+                            style={{ minHeight: '80px' }}
                         />
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
                             {['Handheld vlog style', 'Static camera', 'Slow zoom in', 'Cinematic drone shot'].map(s => (
@@ -324,6 +330,31 @@ export function AnimateTab({
                                 >{s}</button>
                             ))}
                         </div>
+                    </div>
+
+                    {/* Spoken Dialogue */}
+                    <div className="creator-field">
+                        <div className="creator-prompt-row">
+                            <label className="creator-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <Play style={{ width: 12, height: 12, color: 'rgba(52,211,153,0.5)' }} /> Spoken Voice / Dialogue
+                                <span style={{ fontSize: '9px', color: 'rgba(255,255,255,0.3)', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional — words the character says out loud)</span>
+                            </label>
+                        </div>
+                        <textarea
+                            value={i2vScript}
+                            onChange={(e) => setI2VScript(e.target.value)}
+                            placeholder="Write the exact words the character speaks on screen. Use the Scripts page to generate this. Veo will render the character saying these words with lip-sync audio."
+                            className="creator-textarea"
+                            style={{ minHeight: '80px', opacity: 0.8 }}
+                        />
+                        {i2vScript && (
+                            <button
+                                onClick={() => setI2VScript('')}
+                                style={{ marginTop: '4px', fontSize: '10px', color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}
+                            >
+                                Clear script
+                            </button>
+                        )}
                     </div>
 
                     {/* Result Area */}
@@ -340,16 +371,35 @@ export function AnimateTab({
                         {isGeneratingI2V ? (
                             <div className="creator-loading-state">
                                 <LoadingIndicator title="Animating Video..." modelName={selectedModel} type="video" />
+                                <button
+                                    onClick={onCancelI2V}
+                                    style={{
+                                        marginTop: '16px',
+                                        padding: '8px 20px',
+                                        background: 'rgba(239,68,68,0.1)',
+                                        border: '1px solid rgba(239,68,68,0.3)',
+                                        borderRadius: '8px',
+                                        color: 'rgb(239,68,68)',
+                                        fontSize: '11px',
+                                        fontWeight: 700,
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '0.08em',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    Cancel
+                                </button>
                             </div>
                         ) : generatedI2VUrl ? (
                             <div className="relative aspect-video w-full bg-black/40 rounded-2xl overflow-hidden border-2 border-emerald-500/20 shadow-2xl flex items-center justify-center group">
                                 <video src={generatedI2VUrl} controls autoPlay loop className="max-w-full max-h-full object-contain" />
                                 <div className="absolute top-4 right-4 flex gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => onDownload(generatedI2VUrl, 'animated')} className="p-2 bg-black/60 backdrop-blur-md rounded-xl text-white border border-white/10 hover:bg-white/10"><Download className="w-5 h-5" /></button>
-                                    <button onClick={() => onSaveToAssets(generatedI2VUrl, 'video')} className="p-2 bg-black/60 backdrop-blur-md rounded-xl text-white border border-white/10 hover:bg-emerald-500/20"><Save className="w-5 h-5" /></button>
+                                    <button onClick={() => onDownload(generatedI2VUrl, 'animated')} className="p-2 bg-black/60 backdrop-blur-md rounded-xl text-white border border-white/10 hover:bg-white/10" title="Download"><Download className="w-5 h-5" /></button>
                                 </div>
-                                <div className="absolute bottom-6 inset-x-6 flex justify-center opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={onApproveI2V} className="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-black font-bold uppercase tracking-widest rounded-xl shadow-xl">Save & Add to Post</button>
+                                <div className="absolute bottom-6 inset-x-6 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button onClick={() => onSaveToAssets(generatedI2VUrl, 'video')} className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-black text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-1.5">
+                                        <Save className="w-3.5 h-3.5" /> Save to My Media
+                                    </button>
                                 </div>
                             </div>
                         ) : (

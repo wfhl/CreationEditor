@@ -1,9 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings, Plus, Trash2, Save, X, ChevronDown, ChevronUp, Cloud, RefreshCw, Key, Eye, EyeOff, Loader2 } from 'lucide-react';
-import { migrationService } from '../../lib/migrationService';
-import { syncService } from '../../lib/syncService';
-import { dbService } from '../../lib/dbService';
-import { createThumbnails } from '../../lib/imageUtils';
+import { Settings, Plus, Trash2, Save, X, ChevronDown, ChevronUp, Cloud, RefreshCw, Key, Eye, EyeOff } from 'lucide-react';
 import { generateUUID } from '../../lib/uuid';
 import { AssetUploader } from '../asset-uploader';
 import { type DBAsset as Asset } from '../../lib/dbService';
@@ -68,47 +64,6 @@ export function SettingsTab({
     const [activeSection, setActiveSection] = useState<'themes' | 'captions' | 'persona' | 'credentials'>('credentials');
     const [editingThemeId, setEditingThemeId] = useState<string | null>(null);
     const [editingStyleId, setEditingStyleId] = useState<string | null>(null);
-    const [migrationStatus, setMigrationStatus] = useState<string>('');
-    const [isMigrating, setIsMigrating] = useState(false);
-    const [isOptimizing, setIsOptimizing] = useState(false);
-    const [optProgress, setOptProgress] = useState("");
-
-    const handleOptimizeLibrary = async () => {
-        setIsOptimizing(true);
-        setOptProgress("Starting optimization...");
-        try {
-            const posts = await dbService.getRecentPostsBatch(1000, 0, 'prev');
-            setOptProgress(`Optimizing ${posts.length} posts...`);
-            for (let i = 0; i < posts.length; i++) {
-                const post = posts[i];
-                if (!post.thumbnailUrls || post.thumbnailUrls.length === 0) {
-                    setOptProgress(`Processing post ${i + 1}/${posts.length}...`);
-                    post.thumbnailUrls = await createThumbnails(post.mediaUrls);
-                    await dbService.savePost(post);
-                }
-            }
-
-            const history = await dbService.getRecentHistoryBatch(1000, 0, 'prev');
-            setOptProgress(`Optimizing ${history.length} history items...`);
-            for (let i = 0; i < history.length; i++) {
-                const item = history[i];
-                if (item.status === 'success' && (!item.thumbnailUrls || item.thumbnailUrls.length === 0)) {
-                    setOptProgress(`Processing history ${i + 1}/${history.length}...`);
-                    item.thumbnailUrls = await createThumbnails(item.mediaUrls);
-                    await dbService.saveGenerationHistory(item);
-                }
-            }
-            setOptProgress("Optimization complete!");
-            alert("Library optimization complete! All images now have fast-loading thumbnails.");
-        } catch (e) {
-            console.error(e);
-            alert("Optimization failed.");
-        } finally {
-            setIsOptimizing(false);
-            setOptProgress("");
-        }
-    };
-
     // API Keys Local State for editing
     const [localKeys, setLocalKeys] = useState(apiKeys);
     const [showGemini, setShowGemini] = useState(false);
@@ -195,25 +150,6 @@ export function SettingsTab({
         }
     };
 
-    const handleMigration = async () => {
-        if (!confirm("This will upload all local data to Supabase. Continue?")) return;
-
-        setIsMigrating(true);
-        setMigrationStatus("Initializing...");
-
-        try {
-            await migrationService.migrateAll((msg) => setMigrationStatus(msg));
-            alert("Migration completed successfully!");
-            setMigrationStatus("Completed");
-        } catch (e: any) {
-            console.error(e);
-            alert("Migration failed: " + e.message);
-            setMigrationStatus("Failed: " + e.message);
-        } finally {
-            setIsMigrating(false);
-        }
-    };
-
     return (
         <div className="flex h-full w-full pointer-events-auto bg-[var(--bg-deep)]">
             {/* ═══════════════════ LEFT PANEL: NAVIGATION ═══════════════════ */}
@@ -253,33 +189,6 @@ export function SettingsTab({
                         })}
                     </div>
 
-                    <div className="creator-section-divider" style={{ margin: '16px 0' }} />
-
-                    {/* Library Tools */}
-                    <div className="creator-field"> <label className="creator-label">Library Maintenance</label>
-                        <button
-                            onClick={handleOptimizeLibrary}
-                            disabled={isOptimizing}
-                            className="creator-btn-primary w-full justify-center !bg-white/5 hover:!bg-white/10 !border-white/10 !text-white/40 !text-[11px]"
-                        >
-                            {isOptimizing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                            {isOptimizing ? 'Optimizing...' : 'Optimize Library'}
-                        </button>
-                        {optProgress && <p className="text-[9px] text-emerald-500/60 font-medium italic text-center animate-pulse mt-2">{optProgress}</p>}
-                    </div>
-
-                </div>
-
-                {/* Left Panel Footer */}
-                <div className="creator-panel-footer">
-                    <button
-                        onClick={handleMigration}
-                        disabled={isMigrating}
-                        className="creator-btn-primary w-full justify-center !bg-purple-600/10 hover:!bg-purple-600/20 !border-purple-500/20 !text-purple-400 !font-black !tracking-[0.1em]"
-                    >
-                        <Cloud className="w-4 h-4" />
-                        {isMigrating ? migrationStatus : 'Cloud Export Migration'}
-                    </button>
                 </div>
             </div>
 

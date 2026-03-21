@@ -349,15 +349,12 @@ export function EditTab({
 
                         {isRefining ? (
                             <div className="creator-loading-state">
-                                <LoadingIndicator />
-                                <div>
-                                    <p style={{ fontSize: '11px', fontWeight: 800, color: 'rgb(52,211,153)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Optimizing Media...</p>
-                                    {refineProgress > 0 && (
-                                        <div style={{ width: '160px', height: '3px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden', margin: '8px auto 0' }}>
-                                            <div style={{ height: '100%', background: 'rgb(16,185,129)', width: `${refineProgress}%`, transition: 'width 0.5s' }} />
-                                        </div>
-                                    )}
-                                </div>
+                                <LoadingIndicator title="Refining Media..." modelName={selectedModel} type="edit" />
+                                {refineProgress > 0 && (
+                                    <div style={{ width: '200px', height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '99px', overflow: 'hidden', marginTop: '-20px', zIndex: 10 }}>
+                                        <div style={{ height: '100%', background: 'rgb(52,211,153)', width: `${refineProgress}%`, transition: 'width 0.5s', boxShadow: '0 0 10px rgba(52,211,153,0.5)' }} />
+                                    </div>
+                                )}
                             </div>
                         ) : refineResultUrls.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-12">
@@ -366,13 +363,21 @@ export function EditTab({
                                         <ImageWithLoader src={url} alt="Refined" className="w-full h-full" onClick={() => onPreview(url, refineResultUrls)} />
                                         <div className="absolute top-2 right-2 flex gap-1 bg-black/60 backdrop-blur-md p-1.5 rounded-xl border border-white/10 opacity-100 group-hover:opacity-100 transition-opacity">
                                             <button onClick={() => setRefineTarget({ url: url, index: -1 })} className="p-1.5 hover:bg-white/10 rounded-lg" title="Edit again"><Edit2 className="w-4 h-4 text-emerald-400" /></button>
-                                            <button onClick={() => onI2VEntry(url)} className="p-1.5 hover:bg-white/10 rounded-lg text-white" title="Animate"><VideoIcon className="w-4 h-4" /></button>
-                                            <button onClick={() => onDownload(url, `refine_${idx}`)} className="p-1.5 hover:bg-white/10 rounded-lg text-white"><Download className="w-4 h-4" /></button>
-                                            <button onClick={() => onSaveToAssets(url, 'image')} className="p-1.5 hover:bg-emerald-500/20 rounded-lg text-white"><Save className="w-4 h-4" /></button>
+                                            <button onClick={() => onDownload(url, `refine_${idx}`)} className="p-1.5 hover:bg-white/10 rounded-lg text-white" title="Download"><Download className="w-4 h-4" /></button>
                                         </div>
-                                        <div className="absolute bottom-4 inset-x-4 flex gap-2">
-                                            <button onClick={() => onApproveRefinement('replace', url)} className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-black text-[10px] font-bold uppercase tracking-widest rounded-lg shadow-lg">Replace Original</button>
-                                            <button onClick={() => onApproveRefinement('add', url)} className="flex-1 py-2.5 bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg border border-white/10">Add As New</button>
+                                        <div className="absolute bottom-4 inset-x-4 flex flex-col gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <button onClick={() => onApproveRefinement('replace', url)} className="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-black text-[10px] font-bold uppercase tracking-widest rounded-lg shadow-lg">Replace Original</button>
+                                                <button onClick={() => onApproveRefinement('add', url)} className="py-2.5 bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg border border-white/10">Add As New</button>
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <button onClick={() => onI2VEntry(url)} className="py-2.5 bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg flex items-center justify-center gap-1.5">
+                                                    <VideoIcon className="w-3.5 h-3.5" /> Send to Animate
+                                                </button>
+                                                <button onClick={() => onSaveToAssets(url, 'image')} className="py-2.5 bg-white/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-widest rounded-lg flex items-center justify-center gap-1.5">
+                                                    <Save className="w-3.5 h-3.5" /> Save to Media
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}

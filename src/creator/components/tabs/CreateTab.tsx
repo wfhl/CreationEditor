@@ -79,6 +79,8 @@ interface CreateTabProps {
     promptRef?: React.Ref<HTMLTextAreaElement>;
     onNavigateTo?: (tab: string) => void;
     onExit?: () => void;
+    onClearResults?: () => void;
+    onCancelCreate?: () => void;
 }
 
 export function CreateTab({
@@ -149,7 +151,9 @@ export function CreateTab({
     visualsImage,
     outfitImage,
     onNavigateTo,
-    onExit
+    onExit,
+    onClearResults,
+    onCancelCreate
 }: CreateTabProps) {
 
     const currentTheme = selectedThemeId === 'CUSTOM'
@@ -543,8 +547,8 @@ export function CreateTab({
                                         <button onClick={handleGenerateRandomPost} className="creator-result-action">
                                             <Dices style={{ width: 12, height: 12 }} /> Randomize
                                         </button>
-                                        <button onClick={() => setShowSaveForm(true)} className="creator-result-action" style={{ color: 'rgb(52,211,153)' }}>
-                                            <Save style={{ width: 12, height: 12 }} /> Save to Library
+                                        <button onClick={onClearResults} className="creator-result-action" style={{ color: 'rgba(255,100,100,0.8)' }}>
+                                            <Trash2 style={{ width: 12, height: 12 }} /> Clear
                                         </button>
                                     </>
                                 )}
@@ -554,6 +558,26 @@ export function CreateTab({
                         {isGeneratingMedia ? (
                             <div className="creator-loading-state">
                                 <LoadingIndicator title="Generating..." modelName={selectedModel} type={mediaType} />
+                                {onCancelCreate && (
+                                    <button
+                                        onClick={onCancelCreate}
+                                        style={{
+                                            marginTop: '16px',
+                                            padding: '8px 20px',
+                                            background: 'rgba(239,68,68,0.1)',
+                                            border: '1px solid rgba(239,68,68,0.3)',
+                                            borderRadius: '8px',
+                                            color: 'rgb(239,68,68)',
+                                            fontSize: '11px',
+                                            fontWeight: 700,
+                                            textTransform: 'uppercase',
+                                            letterSpacing: '0.08em',
+                                            cursor: 'pointer',
+                                        }}
+                                    >
+                                        Cancel
+                                    </button>
+                                )}
                             </div>
                         ) : generatedMediaUrls.length > 0 ? (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pb-12">
@@ -561,14 +585,19 @@ export function CreateTab({
                                     <div key={idx} className="relative group aspect-[3/4] bg-black/40 rounded-xl overflow-hidden border border-white/5 shadow-2xl hover:border-emerald-500/30 transition-all">
                                         <ImageWithLoader src={url} alt="Gen" className="w-full h-full" onClick={() => onPreview(url)} />
                                         <div className="absolute top-3 right-3 flex gap-2 bg-black/60 backdrop-blur-md p-2 rounded-2xl border border-white/10 opacity-100 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => handleRefineEntry(url, idx)} className="p-2 hover:bg-white/10 rounded-xl" title="Refine Media in Editor"><Edit2 className="w-4 h-4 text-emerald-400" /></button>
-                                            <button onClick={() => onDownload(url, `gen_${idx}`)} className="p-2 hover:bg-white/10 rounded-xl text-white" title="Download Media Output"><Download className="w-4 h-4" /></button>
-                                            <button onClick={() => onRemoveMedia(idx)} className="p-2 hover:bg-red-500/20 rounded-xl text-red-500" title="Delete Media"><Trash2 className="w-4 h-4 text-red-500" /></button>
+                                            <button onClick={() => onSaveToAssets(url, 'image')} className="p-2 hover:bg-emerald-500/20 rounded-xl text-emerald-400" title="Save to Your Media"><Save className="w-4 h-4" /></button>
+                                            <button onClick={() => onDownload(url, `gen_${idx}`)} className="p-2 hover:bg-white/10 rounded-xl text-white" title="Download"><Download className="w-4 h-4" /></button>
+                                            <button onClick={() => onRemoveMedia(idx)} className="p-2 hover:bg-red-500/20 rounded-xl text-red-500" title="Delete"><Trash2 className="w-4 h-4 text-red-500" /></button>
                                         </div>
-                                        <div className="absolute bottom-6 inset-x-6 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => handleI2VEntry(url, idx)} className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-black text-[11px] font-bold uppercase tracking-widest rounded-xl shadow-lg flex items-center justify-center gap-2.5">
-                                                <VideoIcon className="w-4 h-4" /> Animate Video
-                                            </button>
+                                        <div className="absolute bottom-4 inset-x-4 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <button onClick={() => handleRefineEntry(url, idx)} className="py-2.5 bg-white/10 hover:bg-white/20 text-white text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-1.5">
+                                                    <Edit2 className="w-3.5 h-3.5" /> Send to Edit
+                                                </button>
+                                                <button onClick={() => handleI2VEntry(url, idx)} className="py-2.5 bg-emerald-600 hover:bg-emerald-500 text-black text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-1.5">
+                                                    <VideoIcon className="w-3.5 h-3.5" /> Send to Animate
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
@@ -587,43 +616,12 @@ export function CreateTab({
                                 <p className="creator-empty-state-text">
                                     Set up your theme and visuals in the left pane, then click "Generate" to start creating.
                                 </p>
-                                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                                    <button
-                                        onClick={() => onNavigateTo?.('media')}
-                                        className="creator-empty-state-btn"
-                                        style={{ background: 'rgba(16,185,129,0.12)', color: 'rgb(52,211,153)', border: '1px solid rgba(16,185,129,0.3)' }}
-                                    >
-                                        Import from Library
-                                    </button>
-                                    <label className="creator-empty-state-btn">
-                                        Upload Local
-                                        <input type="file" multiple className="hidden" onChange={(e) => onUploadToPost(e.target.files)} />
-                                    </label>
-                                </div>
                             </div>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* Mobile Save Overlay */}
-            {showSaveForm && (
-                <div className="fixed inset-0 z-[150] bg-black/80 backdrop-blur-md flex items-center justify-center p-6" onClick={() => setShowSaveForm(false)}>
-                    <div className="bg-[#0e0e11] border border-white/10 rounded-3xl p-8 w-full max-w-sm space-y-8" onClick={e => e.stopPropagation()}>
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-lg font-bold text-white uppercase tracking-widest">Save Post</h3>
-                            <button onClick={() => setShowSaveForm(false)} className="text-white/40"><X className="w-6 h-6" /></button>
-                        </div>
-                        <div className="space-y-3">
-                            <label className="text-[10px] text-white/40 uppercase font-bold tracking-widest">Topic / Title</label>
-                            <input value={topic} onChange={e => setTopic(e.target.value)} placeholder="Topic..." className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white focus:border-emerald-500 outline-none" autoFocus />
-                        </div>
-                        <button onClick={() => { handleSavePost(); setShowSaveForm(false); }} className="w-full py-5 bg-emerald-600 hover:bg-emerald-500 text-black font-bold uppercase tracking-widest rounded-2xl transition-all">
-                            Confirm Save
-                        </button>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }
