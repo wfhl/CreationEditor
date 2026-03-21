@@ -725,7 +725,7 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
         } catch (error: any) {
             console.error(error);
             generationError = error?.message || 'Unknown error';
-            alert("Media generation failed.");
+            alert(`Media generation failed: ${generationError}`);
         } finally {
             cancelCreateRef.current = null;
             setActiveMediaGenerations(prev => Math.max(0, prev - 1));
@@ -1988,8 +1988,7 @@ TECHNICAL PROMPT: ${finalPromptToUse}`;
                     {/* Close Button */}
                     <button
                         type="button"
-                        className="absolute top-10 right-6 md:top-6 md:right-6 p-4 bg-black/60 hover:bg-black/80 backdrop-blur-md rounded-full text-white/60 hover:text-white transition-all border border-white/10"
-                        style={{ zIndex: 9999 }}
+                        style={{ position: 'fixed', top: '1.5rem', right: '1.5rem', zIndex: 9999, padding: '16px', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50%', color: 'rgba(255,255,255,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                         onClick={(e) => { e.stopPropagation(); setPreviewContext(null); }}
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>

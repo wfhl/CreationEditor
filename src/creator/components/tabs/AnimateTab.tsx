@@ -1,5 +1,5 @@
-import React, { useEffect, useState, type ChangeEvent } from 'react';
-import { Video as VideoIcon, ImagePlus, X, RefreshCw, Play, Save, Download, Layers, Sparkles, Upload, Trash2, Loader2 } from 'lucide-react';
+import React, { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { Video as VideoIcon, ImagePlus, X, RefreshCw, Play, Save, Download, Layers, Sparkles, Upload, Trash2, Loader2, Camera } from 'lucide-react';
 import { CustomSelect } from '../CustomSelect';
 
 import LoadingIndicator from '../loading-indicator';
@@ -87,6 +87,19 @@ export function AnimateTab({
     onNavigateTo
 }: AnimateTabProps) {
     const [isDragging, setIsDragging] = useState(false);
+    const videoRef = useRef<HTMLVideoElement | null>(null);
+
+    const captureFrame = (): string | null => {
+        const video = videoRef.current;
+        if (!video) return null;
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return null;
+        ctx.drawImage(video, 0, 0);
+        return canvas.toDataURL('image/png');
+    };
 
     // Ensure we are on a video model when mounting or if model is invalid
     useEffect(() => {
@@ -391,14 +404,32 @@ export function AnimateTab({
                                 </button>
                             </div>
                         ) : generatedI2VUrl ? (
-                            <div className="relative aspect-video w-full bg-black/40 rounded-2xl overflow-hidden border-2 border-emerald-500/20 shadow-2xl flex items-center justify-center group">
-                                <video src={generatedI2VUrl} controls autoPlay loop className="max-w-full max-h-full object-contain" />
-                                <div className="absolute top-4 right-4 flex gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => onDownload(generatedI2VUrl, 'animated')} className="p-2 bg-black/60 backdrop-blur-md rounded-xl text-white border border-white/10 hover:bg-white/10" title="Download"><Download className="w-5 h-5" /></button>
+                            <div className="flex flex-col gap-3">
+                                <div className="relative aspect-video w-full bg-black/40 rounded-2xl overflow-hidden border-2 border-emerald-500/20 shadow-2xl flex items-center justify-center">
+                                    <video ref={videoRef} src={generatedI2VUrl} controls autoPlay loop className="max-w-full max-h-full object-contain" />
                                 </div>
-                                <div className="absolute bottom-6 inset-x-6 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => onSaveToAssets(generatedI2VUrl, 'video')} className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-black text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-1.5">
+                                <div className="flex gap-2">
+                                    <button onClick={() => onSaveToAssets(generatedI2VUrl, 'video')} className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-black text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-1.5">
                                         <Save className="w-3.5 h-3.5" /> Save to My Media
+                                    </button>
+                                    <button onClick={() => onDownload(generatedI2VUrl, 'animated')} className="p-3 bg-black/40 hover:bg-white/10 border border-white/10 rounded-xl text-white" title="Download">
+                                        <Download className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => { const f = captureFrame(); if (f) onSaveToAssets(f, 'image', 'frame'); else alert('Pause the video first, then click to capture the frame.'); }}
+                                        className="flex-1 py-2.5 bg-black/40 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-1.5"
+                                        title="Pause the video first, then click to save this frame as an image"
+                                    >
+                                        <Camera className="w-3.5 h-3.5" /> Save Frame as Image
+                                    </button>
+                                    <button
+                                        onClick={() => { const f = captureFrame(); if (f) setI2VTarget({ url: f, index: -1 }); else alert('Pause the video first, then click to capture the frame.'); }}
+                                        className="flex-1 py-2.5 bg-black/40 hover:bg-white/10 border border-white/10 text-white/60 hover:text-white text-[10px] font-bold uppercase tracking-widest rounded-xl flex items-center justify-center gap-1.5"
+                                        title="Pause the video first, then click to use this frame as the source for a new animation"
+                                    >
+                                        <RefreshCw className="w-3.5 h-3.5" /> Use Frame as Source
                                     </button>
                                 </div>
                             </div>

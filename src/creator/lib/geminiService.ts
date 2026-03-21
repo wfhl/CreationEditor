@@ -172,7 +172,7 @@ Output ONLY valid JSON with keys: "technical_prompt" and "reasoning".`;
                 const payload: any = {
                     model: modelId,
                     prompt: request.prompt,
-                    config: { numberOfVideos: 1, durationSeconds: duration, aspectRatio: veoAspectRatio, personGeneration: "allow_adult" }
+                    config: { numberOfVideos: 1, durationSeconds: duration, aspectRatio: veoAspectRatio }
                 };
 
                 if (request.contentParts && request.contentParts.length > 0) {
